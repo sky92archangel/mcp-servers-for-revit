@@ -392,6 +392,41 @@
       "commandName": "save_document",
       "description": "Save the current Revit document",
       "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_direct_shape",
+      "description": "Create primitive solid geometry shapes (box, cylinder, extrusion) as DirectShape elements",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_swept_shape",
+      "description": "Create swept solid geometry along a path with rectangular, circular, or horseshoe section profiles",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_space",
+      "description": "Create MEP spaces at specified locations with name, number, and space type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "connect_mep",
+      "description": "Connect two MEP elements by their connectors with optional fitting type (direct, elbow, tee, reducer, cross)",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_mep_system",
+      "description": "Create MEP systems (mechanical or piping) from selected elements with system type and name",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "place_family_instance",
+      "description": "Place family instances with various placement methods (unhosted, hosted, face-based, workplane-based)",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "export_views",
+      "description": "Export views to files in various formats (PNG, JPG, DWG, DXF, IFC) with format-specific settings",
+      "assemblyPath": "RevitMCPCommandSet.dll"
     }
   ]
 }

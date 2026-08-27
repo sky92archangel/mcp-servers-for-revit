@@ -111,34 +111,147 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 
 ## Supported Tools
 
+### General
+
 | Tool | Description |
 | ---- | ----------- |
-| `get_current_view_info` | Get current active view info |
+| `say_hello` | Display a greeting dialog in Revit (connection test) |
+| `send_code_to_revit` | Send C# code to Revit to execute via Roslyn |
+
+### Query & Selection
+
+| Tool | Description |
+| ---- | ----------- |
+| `get_current_view_info` | Get current active view info (name, type, scale, detail level) |
 | `get_current_view_elements` | Get elements from the current active view |
-| `get_available_family_types` | Get available family types in current project |
 | `get_selected_elements` | Get currently selected elements |
-| `get_material_quantities` | Calculate material quantities and takeoffs |
-| `ai_element_filter` | Intelligent element querying tool for AI assistants |
-| `analyze_model_statistics` | Analyze model complexity with element counts |
-| `create_point_based_element` | Create point-based elements (door, window, furniture) |
-| `create_line_based_element` | Create line-based elements (wall, beam, pipe) |
-| `create_surface_based_element` | Create surface-based elements (floor, ceiling, roof) |
+| `get_available_family_types` | Get available family types in current project |
+| `ai_element_filter` | Intelligent element querying tool with multiple filter criteria |
+| `query_parameters` | Get all parameters of an element with name, value, and storage type |
+| `query_geometry` | Get geometry of an element including bounding box, solids, and faces |
+| `query_references` | Get stable geometric references for dimensioning and tagging |
+| `check_interferences` | Check interference collisions between specified elements |
+| `query_view_range` | Get the view range of a plan view |
+
+### Create — Architecture
+
+| Tool | Description |
+| ---- | ----------- |
+| `create_wall` | Create walls with start/end points, height, thickness, and type |
+| `create_floor` | Create floors with boundary polygon, thickness, and level |
+| `create_ceiling` | Create ceilings with boundary, level, and thickness |
+| `create_roof` | Create roofs with type (flat/pitched), boundary, and slope |
+| `create_column` | Create architectural or structural columns at specified locations |
+| `create_stair` | Create stairs with base/top level, width, riser, tread, and landings |
+| `create_ramp` | Create ramps with base/top level and width |
+| `create_railing` | Create railings along a path with height and type |
+| `create_opening` | Create openings in walls, floors, or shafts |
+| `create_model_curve` | Create model lines between start and end points |
+| `create_reference_plane` | Create reference planes with start/end and normal direction |
+| `create_group` | Create a group from selected element IDs |
 | `create_grid` | Create a grid system with smart spacing generation |
 | `create_level` | Create levels at specified elevations |
 | `create_room` | Create and place rooms at specified locations |
-| `create_dimensions` | Create dimension annotations in the current view |
 | `create_structural_framing_system` | Create a structural beam framing system |
-| `delete_element` | Delete elements by ID |
-| `operate_element` | Operate on elements (select, setColor, hide, etc.) |
-| `color_elements` | Color elements based on a parameter value |
+| `create_line_based_element` | Create line-based elements (wall, beam, pipe) — generic |
+| `create_point_based_element` | Create point-based elements (door, window, furniture) — generic |
+| `create_surface_based_element` | Create surface-based elements (floor, ceiling, roof) — generic |
+
+### Create — MEP
+
+| Tool | Description |
+| ---- | ----------- |
+| `create_duct` | Create ducts with start/end points, width, height, and system type |
+| `create_pipe` | Create pipes with start/end points, diameter, and system type |
+| `create_conduit` | Create conduits with start/end points and diameter |
+| `create_equipment` | Place MEP equipment at specified locations with rotation |
+| `create_space` | Create MEP spaces at specified locations |
+| `create_direct_shape` | Create primitive solid geometry (box, cylinder, extrusion) as DirectShape |
+| `create_swept_shape` | Create swept solids along a path with section profiles |
+| `create_mep_curve` | Create MEP curve elements (duct/pipe/conduit) — multi-type |
+| `connect_mep` | Connect two MEP elements by their connectors |
+| `create_mep_system` | Create MEP systems from selected elements |
+
+### Annotation
+
+| Tool | Description |
+| ---- | ----------- |
+| `create_dimensions` | Create dimension annotations between elements or points |
+| `create_text_note` | Create text notes in views with content, position, and alignment |
+| `create_tag` | Create independent tags for elements (doors, windows, walls, rooms) |
 | `tag_all_walls` | Tag all walls in the current view |
 | `tag_all_rooms` | Tag all rooms in the current view |
+| `create_filled_region` | Create a filled region in a view with boundary points |
+| `create_revision` | Create a revision record with name, date, and number |
+| `create_revision_cloud` | Create a revision cloud in a view associated with a revision |
+
+### Views & Sheets
+
+| Tool | Description |
+| ---- | ----------- |
+| `create_view` | Create views (floor plan, ceiling plan, elevation, section, 3D) |
+| `create_drafting_view` | Create a drafting view with specified name and scale |
+| `create_section_view` | Create a section view with bounding box |
+| `create_elevation_view` | Create an elevation view at a direction index |
+| `create_callout` | Create a callout view from a host view |
+| `duplicate_view` | Duplicate a view with duplicate, with detailing, or dependent mode |
+| `create_view_template` | Create a view template from a source view |
+| `create_sheet` | Create sheets with number, name, and optional title block |
+| `place_view_on_sheet` | Place a view onto a sheet at a specified location |
+| `create_schedule` | Create schedules (regular, material, keynote, view/sheet/revision list) |
+| `place_schedule_on_sheet` | Place an existing schedule on a sheet |
+| `create_detail_curve` | Create detail lines in a view |
+| `set_view_properties` | Set view properties (scale, detail level, crop box, display style, template) |
+| `set_category_overrides` | Set graphic overrides for a category in a view |
+| `manage_view_filters` | Add or remove view filters with visibility and overrides |
+| `set_view_range` | Set the plan view range offsets |
+| `manage_schedule_fields` | Add, remove, reorder, or hide schedule fields |
+| `manage_graphics_resources` | Manage line styles and fill patterns |
+
+### Modify
+
+| Tool | Description |
+| ---- | ----------- |
+| `operate_element` | Operate on elements (select, setColor, hide, isolate, etc.) |
+| `color_elements` | Color elements based on a parameter value |
+| `delete_element` | Delete elements by ID |
+| `set_parameters` | Batch set parameters on elements with key-value pairs |
+| `transform_elements` | Move, copy, rotate, or mirror elements |
+| `rename_element` | Rename a Revit element (level, grid, view, type) |
+| `set_element_curve` | Modify location curve of linear elements |
+| `duplicate_type` | Duplicate an element type with a new name |
+| `manage_family_parameters` | Add, rename, remove, or set formulas on family parameters |
+| `manage_project_parameters` | List or add shared parameters to the project |
+
+### Family
+
+| Tool | Description |
+| ---- | ----------- |
+| `load_family` | Load a family .rfa file into the current project |
+| `place_family_instance` | Place family instances (unhosted, hosted, face-based, workplane-based) |
+
+### Analysis & Data
+
+| Tool | Description |
+| ---- | ----------- |
+| `analyze_model_statistics` | Analyze model complexity with element counts by category, type, family, and level |
 | `export_room_data` | Export all room data from the project |
+| `get_material_quantities` | Calculate material quantities and takeoffs |
+| `export_views` | Export views to files (PNG, JPG, DWG, DXF, IFC) |
+
+### Document
+
+| Tool | Description |
+| ---- | ----------- |
+| `save_document` | Save the current Revit document |
+
+### Database (local SQLite)
+
+| Tool | Description |
+| ---- | ----------- |
 | `store_project_data` | Store project metadata in local database |
 | `store_room_data` | Store room metadata in local database |
 | `query_stored_data` | Query stored project and room data |
-| `send_code_to_revit` | Send C# code to Revit to execute |
-| `say_hello` | Display a greeting dialog in Revit (connection test) |
 
 ## Testing
 
