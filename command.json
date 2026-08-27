@@ -122,6 +122,276 @@
       "commandName": "create_dimensions",
       "description": "Create dimension annotations between elements or points in the current view",
       "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_wall",
+      "description": "Create walls with start/end points, height, thickness, level, and type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_floor",
+      "description": "Create floors with boundary polygon, thickness, level, and structural settings",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_ceiling",
+      "description": "Create ceilings with boundary, level, thickness, and type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_roof",
+      "description": "Create roofs with type (flat/pitched), boundary, thickness, slope, and material",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_column",
+      "description": "Create architectural or structural columns at specified locations",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_stair",
+      "description": "Create stairs with base/top level, width, riser height, tread depth, and optional landings",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_ramp",
+      "description": "Create ramps with base/top level, width, and type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_railing",
+      "description": "Create railings along a path with height, level, offset, and type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_opening",
+      "description": "Create openings in walls, floors, or as shaft openings with position and dimensions",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_model_curve",
+      "description": "Create model curves (model lines) between start and end points on a sketch plane",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_reference_plane",
+      "description": "Create reference planes with start/end points and normal direction",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_group",
+      "description": "Create a group from selected element IDs with a given name",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_duct",
+      "description": "Create ducts with start/end points, width, height, system type, and level",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_pipe",
+      "description": "Create pipes with start/end points, diameter, system type, and level",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_conduit",
+      "description": "Create conduits with start/end points, diameter, and level",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_equipment",
+      "description": "Place MEP equipment (family instances) at specified locations with rotation",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_view",
+      "description": "Create views (floor plan, ceiling plan, elevation, section, 3D) with type, level, scale, and detail level",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_sheet",
+      "description": "Create sheets with number, name, and optional title block",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "place_view_on_sheet",
+      "description": "Place a view onto a sheet at a specified location",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_schedule",
+      "description": "Create schedules (regular, material, keynote, view list, sheet list, revision) with category and fields",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_text_note",
+      "description": "Create text notes in views with text content, position, rotation, and alignment",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_tag",
+      "description": "Create independent tags for elements (doors, windows, walls, rooms) in views",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "query_parameters",
+      "description": "Get all parameters of a Revit element with name, value, and storage type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "query_geometry",
+      "description": "Get geometry of an element including bounding box, solid summary, and face details",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "query_references",
+      "description": "Get stable geometric references of faces and edges for dimensioning and tagging",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "check_interferences",
+      "description": "Check interference collisions between specified elements in the model",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "query_view_range",
+      "description": "Get the view range (top, cut plane, bottom, view depth) of a plan view",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "set_parameters",
+      "description": "Batch set parameters on elements with key-value pairs and optional unit conversion",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "transform_elements",
+      "description": "Move, copy, rotate, or mirror elements with translation vectors and angles",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "rename_element",
+      "description": "Rename a Revit element (levels, grids, views, element types, and family types)",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "set_element_curve",
+      "description": "Modify the location curve of linear elements by setting new start and end points",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "duplicate_type",
+      "description": "Duplicate an element type with a new name and parameters",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "manage_family_parameters",
+      "description": "Add, rename, remove, or set formulas on family parameters within a family document",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "manage_project_parameters",
+      "description": "List available shared parameters or add shared parameters to project",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_drafting_view",
+      "description": "Create a drafting view with specified name, scale, and detail level",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_section_view",
+      "description": "Create a section view with bounding box, name, and view family type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_elevation_view",
+      "description": "Create an elevation view at a specified direction index (0-3) with view family type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_callout",
+      "description": "Create a callout view from a host view with bounding box and name",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "duplicate_view",
+      "description": "Duplicate a view with options: duplicate, with detailing, or as dependent",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_view_template",
+      "description": "Create a view template from a source view with a specified name",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_detail_curve",
+      "description": "Create detail lines in a view from start and end points",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_filled_region",
+      "description": "Create a filled region in a view with boundary points and type",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_revision",
+      "description": "Create a revision record with name, date, number, and description",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_revision_cloud",
+      "description": "Create a revision cloud in a view associated with a revision",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "place_schedule_on_sheet",
+      "description": "Place an existing schedule on a sheet at a specified location",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "load_family",
+      "description": "Load a family .rfa file into the current Revit project",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "create_mep_curve",
+      "description": "Create MEP curve elements (duct, pipe, or conduit) between start and end points",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "set_view_properties",
+      "description": "Set view properties including scale, detail level, crop box, display style, and view template",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "set_category_overrides",
+      "description": "Set graphic overrides for a category in a view (color, line weight, fill, halftone, transparency)",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "manage_view_filters",
+      "description": "Add or remove view filters with visibility and graphic overrides",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "set_view_range",
+      "description": "Set the plan view range including top, cut plane, bottom, and view depth offsets",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "manage_schedule_fields",
+      "description": "Add, remove, reorder, or hide/show fields in a schedule",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "manage_graphics_resources",
+      "description": "Manage line styles and fill patterns in the project",
+      "assemblyPath": "RevitMCPCommandSet.dll"
+    },
+    {
+      "commandName": "save_document",
+      "description": "Save the current Revit document",
+      "assemblyPath": "RevitMCPCommandSet.dll"
     }
   ]
 }
