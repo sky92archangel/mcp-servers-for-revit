@@ -1,6 +1,4 @@
-using Autodesk.Revit.UI;
 using RevitMCPCommandSet.Models.Annotation;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Annotation
@@ -89,7 +87,7 @@ namespace RevitMCPCommandSet.Services.Annotation
                         {
                             if (data.Rotation != 0)
                             {
-                                textNote.Rotation = data.Rotation;
+                                VersionCompat.SetTextNoteRotation(doc, textNote, data.Rotation);
                             }
 
                             if (data.Width > 0)

@@ -1,8 +1,4 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using RevitMCPCommandSet.Models.Architecture;
-using RevitMCPCommandSet.Models.Common;
-using RevitMCPCommandSet.Utils;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Architecture
@@ -69,7 +65,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                 XYZ location = info.Location != null ? JZPoint.ToXYZ(info.Location) : null;
                                 if (location == null)
                                 {
-                                    location = (hostWall.GetLocation() as LocationCurve)?.Curve?.Evaluate(0.5, true);
+                                    location = VersionCompat.GetWallLocationCurve(hostWall)?.Evaluate(0.5, true);
                                 }
 
                                 // Use Opening.Add for rectangular wall openings

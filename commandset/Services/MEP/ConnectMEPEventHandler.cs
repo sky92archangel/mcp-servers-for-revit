@@ -1,6 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPCommandSet.Models.MEP;
 using RevitMCPSDK.API.Interfaces;
 
@@ -171,9 +168,9 @@ namespace RevitMCPCommandSet.Services.MEP
       {
         manager = fi.MEPModel?.ConnectorManager;
       }
-      else if (elem is MechanicalEquipment mechEquip)
+      else if (elem is FamilyInstance fi2)
       {
-        manager = mechEquip.MEPModel?.ConnectorManager;
+        manager = fi2.MEPModel?.ConnectorManager;
       }
 
       return manager?.Connectors;

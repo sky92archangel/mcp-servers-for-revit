@@ -1,7 +1,4 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using Newtonsoft.Json.Linq;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
@@ -142,7 +139,11 @@ namespace RevitMCPCommandSet.Services.Modify
                         int blue = colorObj["b"]?.Value<int>() ?? 0;
 
                         FillPattern fillPattern = existingPattern.GetFillPattern();
+#if REVIT2024_OR_GREATER
                         fillPattern.Color = red + green * 256 + blue * 65536;
+#else
+                        fillPattern.Color = red + green * 256 + blue * 65536;
+#endif
                         existingPattern.SetFillPattern(fillPattern);
                     }
                 }

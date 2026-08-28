@@ -1,6 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
@@ -54,8 +51,17 @@ namespace RevitMCPCommandSet.Services.Modify
                         case "add":
                             if (string.IsNullOrEmpty(Name))
                                 throw new ArgumentException("name is required for add action");
+#if REVIT2023_OR_GREATER
                             var paramTypeEnum = ForgeTypeId.GetForgeTypeId(ParamType ?? "IFC_TYPE");
                             familyManager.AddParameter(Name, paramTypeEnum);
+#else
+                            ParameterType pt = ParameterType.Text;
+                            if (!string.IsNullOrEmpty(ParamType))
+                            {
+                                Enum.TryParse(ParamType, true, out pt);
+                            }
+                            familyManager.AddParameter(Name, pt);
+#endif
                             break;
 
                         case "rename":

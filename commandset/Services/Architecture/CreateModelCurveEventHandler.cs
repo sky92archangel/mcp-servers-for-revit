@@ -1,10 +1,5 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using RevitMCPCommandSet.Models.Architecture;
-using RevitMCPCommandSet.Models.Common;
-using RevitMCPCommandSet.Utils;
 using RevitMCPSDK.API.Interfaces;
-using Point = RevitMCPCommandSet.Models.Common.JZPoint;
 
 namespace RevitMCPCommandSet.Services.Architecture
 {
@@ -86,7 +81,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                     if (info.Points != null && info.Points.Count >= 2)
                                     {
                                         IList<XYZ> pts = info.Points.Select(p => new XYZ(p.X / 304.8, p.Y / 304.8, p.Z / 304.8)).ToList();
-                                        curve = NurbsSpline.CreateByInterpolation(pts);
+                                        curve = VersionCompat.CreateNurbSpline(pts);
                                     }
                                     break;
                             }

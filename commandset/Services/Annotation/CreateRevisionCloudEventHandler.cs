@@ -1,7 +1,4 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using Newtonsoft.Json.Linq;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Annotation
@@ -66,7 +63,7 @@ namespace RevitMCPCommandSet.Services.Annotation
 
                     IList<CurveLoop> loops = new List<CurveLoop> { curveLoop };
 
-                    RevisionCloud cloud = RevisionCloud.Create(doc, revisionElemId, loops, viewElemId);
+                    RevisionCloud cloud = VersionCompat.CreateRevisionCloud(doc, revisionElemId, loops, viewElemId);
 
                     int cloudId = cloud.Id.GetIntValue();
 

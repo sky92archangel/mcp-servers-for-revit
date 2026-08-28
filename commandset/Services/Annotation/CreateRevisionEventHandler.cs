@@ -1,6 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Annotation
@@ -53,7 +50,7 @@ namespace RevitMCPCommandSet.Services.Annotation
 
                     if (!string.IsNullOrEmpty(RevisionNumber))
                     {
-                        revision.RevisionNumber = RevisionNumber;
+                        revision.SetRevisionNumber(RevisionNumber);
                     }
 
                     if (!string.IsNullOrEmpty(RevisionDescription) && string.IsNullOrEmpty(RevisionName))

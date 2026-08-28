@@ -1,6 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPCommandSet.Models.Views;
 using RevitMCPSDK.API.Interfaces;
 
@@ -89,17 +86,29 @@ namespace RevitMCPCommandSet.Services.Views
 
                             if (info.ShowHeaders.HasValue)
                             {
-                                try { schedule.ShowHeaders = info.ShowHeaders.Value; } catch { }
+#if REVIT2024_OR_GREATER
+                                schedule.ShowHeaders = info.ShowHeaders.Value;
+#else
+                                schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_HEADER)?.Set(info.ShowHeaders.Value ? 1 : 0);
+#endif
                             }
 
                             if (info.ShowGridLines.HasValue)
                             {
-                                try { schedule.ShowGridLines = info.ShowGridLines.Value; } catch { }
+#if REVIT2024_OR_GREATER
+                                schedule.ShowGridLines = info.ShowGridLines.Value;
+#else
+                                schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_GRID_LINES)?.Set(info.ShowGridLines.Value ? 1 : 0);
+#endif
                             }
 
                             if (info.ShowOutlines.HasValue)
                             {
-                                try { schedule.ShowOutlines = info.ShowOutlines.Value; } catch { }
+#if REVIT2024_OR_GREATER
+                                schedule.ShowOutlines = info.ShowOutlines.Value;
+#else
+                                schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_OUTLINES)?.Set(info.ShowOutlines.Value ? 1 : 0);
+#endif
                             }
 
                             if (!string.IsNullOrEmpty(info.TemplateId) && int.TryParse(info.TemplateId, out int templateIntId))

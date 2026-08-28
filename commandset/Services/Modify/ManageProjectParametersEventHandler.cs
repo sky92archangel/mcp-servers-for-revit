@@ -1,7 +1,4 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using Newtonsoft.Json.Linq;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
@@ -68,9 +65,15 @@ namespace RevitMCPCommandSet.Services.Modify
                 parameters.Add(new
                 {
                     Name = def.Name,
+#if REVIT2023_OR_GREATER
+                    ParameterType = def.GetDataType().ToString(),
+                    Group = "PG_DATA",
+                    Visible = true,
+#else
                     ParameterType = def.ParameterType.ToString(),
                     Group = def.ParameterGroup.ToString(),
                     Visible = def.Visible,
+#endif
                     Categories = categories
                 });
             }
@@ -134,7 +137,11 @@ namespace RevitMCPCommandSet.Services.Modify
                         newBinding.Categories = catSet;
                     }
 
+#if REVIT2023_OR_GREATER
                     bindingMap.Insert(sharedParam, newBinding, BuiltInParameterGroup.PG_DATA);
+#else
+                    bindingMap.Insert(sharedParam, newBinding, ParameterGroup.PG_DATA);
+#endif
                 }
                 trans.Commit();
             }

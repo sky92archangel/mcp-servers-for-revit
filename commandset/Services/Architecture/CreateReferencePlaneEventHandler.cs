@@ -1,8 +1,4 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
 using RevitMCPCommandSet.Models.Architecture;
-using RevitMCPCommandSet.Models.Common;
-using RevitMCPCommandSet.Utils;
 using RevitMCPSDK.API.Interfaces;
 using Point = RevitMCPCommandSet.Models.Common.JZPoint;
 
@@ -73,7 +69,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                         XYZ origin = new XYZ(info.Origin.X / 304.8, info.Origin.Y / 304.8, info.Origin.Z / 304.8);
                                         XYZ normal = new XYZ(info.Normal.X, info.Normal.Y, info.Normal.Z);
                                         Plane plane = Plane.CreateByNormalAndOrigin(normal, origin);
-                                        refPlane = ReferencePlane.Create(_doc, plane);
+                                        refPlane = VersionCompat.CreateReferencePlane(_doc, plane);
                                     }
                                     break;
 

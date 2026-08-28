@@ -1,6 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
@@ -54,7 +51,7 @@ namespace RevitMCPCommandSet.Services.Views
                             option = ViewDuplicateOption.WithDetailing;
                             break;
                         case "dependent":
-                            option = ViewDuplicateOption.Dependent;
+                            option = VersionCompat.GetDependentDuplicateOption();
                             break;
                         default:
                             option = ViewDuplicateOption.Duplicate;
