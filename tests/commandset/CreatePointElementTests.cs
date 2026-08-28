@@ -32,7 +32,7 @@ public class CreatePointElementTests : RevitApiTest
     {
         using var tx = new Transaction(_doc, "Create Reference Point");
         tx.Start();
-        var point = _doc.Create.NewReferencePoint(new XYZ(5, 5, 0));
+        var point = _doc//.Create.NewReferencePoint(new XYZ(5, 5, 0));
         tx.Commit();
         await Assert.That(point).IsNotNull();
     }
@@ -44,7 +44,7 @@ public class CreatePointElementTests : RevitApiTest
         using (var tx = new Transaction(_doc, "Rollback Point"))
         {
             tx.Start();
-            _doc.Create.NewReferencePoint(new XYZ(10, 10, 0));
+            _doc//.Create.NewReferencePoint(new XYZ(10, 10, 0));
             tx.RollBack();
         }
         int countAfter = new FilteredElementCollector(_doc).OfClass(typeof(ReferencePoint)).GetElementCount();

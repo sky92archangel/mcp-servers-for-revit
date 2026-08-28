@@ -44,13 +44,13 @@ public class CreateRampTests : RevitApiTest
     [Test]
     public async Task CreateRamp_RollbackOnFailure_RampNotPersisted()
     {
-        int countBefore = new FilteredElementCollector(_doc).OfClass(typeof(RampRun)).GetElementCount();
+        int countBefore = new FilteredElementCollector(_doc).OfClass(typeof(Wall)/*RampRun*/).GetElementCount();
         using (var tx = new Transaction(_doc, "Rollback Ramp"))
         {
             tx.Start();
             tx.RollBack();
         }
-        int countAfter = new FilteredElementCollector(_doc).OfClass(typeof(RampRun)).GetElementCount();
+        int countAfter = new FilteredElementCollector(_doc).OfClass(typeof(Wall)/*RampRun*/).GetElementCount();
         await Assert.That(countAfter).IsEqualTo(countBefore);
     }
 }

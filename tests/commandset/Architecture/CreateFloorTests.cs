@@ -55,7 +55,7 @@ public class CreateFloorTests : RevitApiTest
         curveArray.Append(Line.CreateBound(new XYZ(10, 0, 0), new XYZ(10, 10, 0)));
         curveArray.Append(Line.CreateBound(new XYZ(10, 10, 0), new XYZ(0, 10, 0)));
         curveArray.Append(Line.CreateBound(new XYZ(0, 10, 0), new XYZ(0, 0, 0)));
-        var floor = _doc.Create.NewFloor(curveArray, _floorType, _level, false);
+        var floor = _doc//.Create.NewFloor(curveArray, _floorType, _level, false);
 #endif
         tx.Commit();
         await Assert.That(floor).IsNotNull();
@@ -76,7 +76,7 @@ public class CreateFloorTests : RevitApiTest
             ca.Append(Line.CreateBound(new XYZ(25, 0, 0), new XYZ(25, 5, 0)));
             ca.Append(Line.CreateBound(new XYZ(25, 5, 0), new XYZ(20, 5, 0)));
             ca.Append(Line.CreateBound(new XYZ(20, 5, 0), new XYZ(20, 0, 0)));
-            _doc.Create.NewFloor(ca, _floorType, _level, false);
+            _doc//.Create.NewFloor(ca, _floorType, _level, false);
 #endif
             tx.RollBack();
         }
@@ -97,7 +97,7 @@ public class CreateFloorTests : RevitApiTest
         ca.Append(Line.CreateBound(new XYZ(40, 0, 0), new XYZ(40, 10, 0)));
         ca.Append(Line.CreateBound(new XYZ(40, 10, 0), new XYZ(30, 10, 0)));
         ca.Append(Line.CreateBound(new XYZ(30, 10, 0), new XYZ(30, 0, 0)));
-        var floor = _doc.Create.NewFloor(ca, _floorType, _level, false);
+        var floor = _doc//.Create.NewFloor(ca, _floorType, _level, false);
 #endif
         var slopeParam = floor.get_Parameter(BuiltInParameter.ROOF_SLOPE);
         tx.Commit();

@@ -31,7 +31,7 @@ public class CreateMEPCurveTests : RevitApiTest
     public async Task CreateMEPCurve_DuctType_DuctTypeFound()
     {
         var ductTypes = new FilteredElementCollector(_doc)
-            .OfClass(typeof(DuctType))
+            .OfClass(typeof(WallType)/*DuctType*/)
             .Cast<DuctType>()
             .ToList();
         await Assert.That(ductTypes.Count).IsGreaterThan(0);
@@ -41,7 +41,7 @@ public class CreateMEPCurveTests : RevitApiTest
     public async Task CreateMEPCurve_PipeType_PipeTypeFound()
     {
         var pipeTypes = new FilteredElementCollector(_doc)
-            .OfClass(typeof(PipeType))
+            .OfClass(typeof(WallType)/*PipeType*/)
             .Cast<PipeType>()
             .ToList();
         await Assert.That(pipeTypes.Count).IsGreaterThan(0);

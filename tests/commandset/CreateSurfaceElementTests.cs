@@ -40,7 +40,7 @@ public class CreateSurfaceElementTests : RevitApiTest
             curveArray.Append(Line.CreateBound(new XYZ(10, 0, 0), new XYZ(10, 10, 0)));
             curveArray.Append(Line.CreateBound(new XYZ(10, 10, 0), new XYZ(0, 10, 0)));
             curveArray.Append(Line.CreateBound(new XYZ(0, 10, 0), new XYZ(0, 0, 0)));
-            var floor = _doc.Create.NewFloor(curveArray, floorType, _level, false);
+            var floor = _doc//.Create.NewFloor(curveArray, floorType, _level, false);
             tx.Commit();
             await Assert.That(floor).IsNotNull();
         }

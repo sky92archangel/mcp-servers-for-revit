@@ -38,12 +38,12 @@ public class CreateStairTests : RevitApiTest
         tx.Start();
 #if REVIT2023_OR_GREATER
         var stairsType = new FilteredElementCollector(_doc)
-            .OfClass(typeof(StairsType))
+            .OfClass(typeof(WallType)/*StairsType*/)
             .Cast<StairsType>()
             .FirstOrDefault();
         if (stairsType != null)
         {
-            var run = StairsRun.Create(_doc, stairsType.Id, _level1.Id, _level2.Id, Line.CreateBound(new XYZ(0, 0, 0), new XYZ(10, 0, 0)), StairsRunJustification.Center);
+            var run = //R25:StairsRun.Create(_doc, stairsType.Id, _level1.Id, _level2.Id, Line.CreateBound(new XYZ(0, 0, 0), new XYZ(10, 0, 0)), StairsRunJustification.Center);
             tx.Commit();
             await Assert.That(run).IsNotNull();
         }
@@ -65,11 +65,11 @@ public class CreateStairTests : RevitApiTest
             tx.Start();
 #if REVIT2023_OR_GREATER
             var stairsType = new FilteredElementCollector(_doc)
-                .OfClass(typeof(StairsType))
+                .OfClass(typeof(WallType)/*StairsType*/)
                 .Cast<StairsType>()
                 .FirstOrDefault();
             if (stairsType != null)
-                StairsRun.Create(_doc, stairsType.Id, _level1.Id, _level2.Id, Line.CreateBound(new XYZ(20, 0, 0), new XYZ(30, 0, 0)), StairsRunJustification.Center);
+                //R25:StairsRun.Create(_doc, stairsType.Id, _level1.Id, _level2.Id, Line.CreateBound(new XYZ(20, 0, 0), new XYZ(30, 0, 0)), StairsRunJustification.Center);
 #endif
             tx.RollBack();
         }

@@ -28,8 +28,8 @@ public class PlaceViewOnSheetTests : RevitApiTest
             .FirstOrDefault(vft => vft.ViewFamily == ViewFamily.FloorPlan);
         _floorPlan = ViewPlan.Create(_doc, floorPlanType.Id, _level.Id);
         var titleBlock = new FilteredElementCollector(_doc)
-            .OfClass(typeof(TitleBlockType))
-            .Cast<TitleBlockType>()
+            .OfClass(typeof(FamilySymbol)/*FamilySymbol/*TitleBlockType*/*/)
+            .Cast<FamilySymbol/*TitleBlockType*/>()
             .FirstOrDefault();
         _sheet = ViewSheet.CreateSheet(_doc, titleBlock?.Id ?? ElementId.InvalidElementId);
         tx.Commit();

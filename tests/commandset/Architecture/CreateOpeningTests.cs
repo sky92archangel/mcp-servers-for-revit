@@ -58,7 +58,7 @@ public class CreateOpeningTests : RevitApiTest
         {
             tx.Start();
 #if !REVIT2025_OR_GREATER
-            // Opening.Add(_wall, new XYZ(6, 0, 0), new XYZ(8, 0, 3));
+            // //R25:Opening.Add(_wall, new XYZ(6, 0, 0), new XYZ(8, 0, 3));
 #endif
             tx.RollBack();
         }
