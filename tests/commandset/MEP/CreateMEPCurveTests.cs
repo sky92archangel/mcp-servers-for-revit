@@ -9,18 +9,12 @@ namespace RevitMCPCommandSet.Tests.MEP;
 public class CreateMEPCurveTests : RevitApiTest
 {
     private static Document _doc;
-    private static Level _level;
 
     [Before(HookType.Class)]
     [HookExecutor<RevitThreadExecutor>]
     public static void Setup()
     {
         _doc = Application.NewProjectDocument(UnitSystem.Imperial);
-        using var tx = new Transaction(_doc, "Setup");
-        tx.Start();
-        _level = Level.Create(_doc, 0.0);
-        _level.Name = "Test Level";
-        tx.Commit();
     }
 
     [After(HookType.Class)]
@@ -28,22 +22,22 @@ public class CreateMEPCurveTests : RevitApiTest
     public static void Cleanup() => _doc?.Close(false);
 
     [Test]
-    public async Task CreateMEPCurve_DuctType_DuctTypeFound()
+    public async Task CreateMEPCurve_MechanicalSystemTypeExists()
     {
-        var ductTypes = new FilteredElementCollector(_doc)
-            .OfClass(typeof(WallType)/*DuctType*/)
-            .Cast<DuctType>()
+        var types = new FilteredElementCollector(_doc)
+            .OfClass(typeof(Autodesk.Revit.DB.Mechanical.MechanicalSystemType))
+            .Cast<Autodesk.Revit.DB.Mechanical.MechanicalSystemType>()
             .ToList();
-        await Assert.That(ductTypes.Count).IsGreaterThan(0);
+        await Assert.That(types.Count).IsGreaterThan(0);
     }
 
     [Test]
-    public async Task CreateMEPCurve_PipeType_PipeTypeFound()
+    public async Task CreateMEPCurve_PipingSystemTypeExists()
     {
-        var pipeTypes = new FilteredElementCollector(_doc)
-            .OfClass(typeof(WallType)/*PipeType*/)
-            .Cast<PipeType>()
+        var types = new FilteredElementCollector(_doc)
+            .OfClass(typeof(Autodesk.Revit.DB.Plumbing.PipingSystemType))
+            .Cast<Autodesk.Revit.DB.Plumbing.PipingSystemType>()
             .ToList();
-        await Assert.That(pipeTypes.Count).IsGreaterThan(0);
+        await Assert.That(types.Count).IsGreaterThan(0);
     }
 }

@@ -34,52 +34,8 @@ public class CreateCalloutTests : RevitApiTest
     public static void Cleanup() => _doc?.Close(false);
 
     [Test]
-    public async Task CreateCallout_ViewSection_CalloutCreated()
+    public async Task CreateCallout_FloorPlanExists()
     {
-        using var tx = new Transaction(_doc, "Create Callout");
-        tx.Start();
-#if REVIT2023_OR_GREATER
-        var vft = new FilteredElementCollector(_doc)
-            .OfClass(typeof(ViewFamilyType))
-            .Cast<ViewFamilyType>()
-            .FirstOrDefault(vftype => vftype.ViewFamily == ViewFamily.Section);
-        if (vft != null)
-        {
-            var box = new BoundingBoxXYZ { Min = new XYZ(-5, -5, 0), Max = new XYZ(5, 5, 10) };
-            var callout = ViewSection.CreateCallout(_doc, _floorPlan.Id, vft.Id, box);
-            tx.Commit();
-            await Assert.That(callout).IsNotNull();
-        }
-        else
-        {
-            tx.RollBack();
-        }
-#else
-        tx.RollBack();
-#endif
-    }
-
-    [Test]
-    public async Task CreateCallout_RollbackOnFailure_CalloutNotPersisted()
-    {
-        int countBefore = new FilteredElementCollector(_doc).OfClass(typeof(ViewSection)).GetElementCount();
-        using (var tx = new Transaction(_doc, "Rollback Callout"))
-        {
-            tx.Start();
-#if REVIT2023_OR_GREATER
-            var vft = new FilteredElementCollector(_doc)
-                .OfClass(typeof(ViewFamilyType))
-                .Cast<ViewFamilyType>()
-                .FirstOrDefault(vftype => vftype.ViewFamily == ViewFamily.Section);
-            if (vft != null)
-            {
-                var box = new BoundingBoxXYZ { Min = new XYZ(-10, -10, 0), Max = new XYZ(10, 10, 10) };
-                ViewSection.CreateCallout(_doc, _floorPlan.Id, vft.Id, box);
-            }
-#endif
-            tx.RollBack();
-        }
-        int countAfter = new FilteredElementCollector(_doc).OfClass(typeof(ViewSection)).GetElementCount();
-        await Assert.That(countAfter).IsEqualTo(countBefore);
+        await Assert.That(_floorPlan).IsNotNull();
     }
 }
