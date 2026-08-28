@@ -1,6 +1,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using RevitMCPCommandSet.Models.Common;
+using RevitMCPCommandSet.Utils;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Query
@@ -48,7 +49,7 @@ namespace RevitMCPCommandSet.Services.Query
                     rangeData.Add(new
                     {
                         Parameter = item.Name,
-                        LevelId = levelId.IntegerValue,
+                        LevelId = levelId.GetIntValue(),
                         LevelName = level?.Name ?? "None",
                         Offset = offset
                     });

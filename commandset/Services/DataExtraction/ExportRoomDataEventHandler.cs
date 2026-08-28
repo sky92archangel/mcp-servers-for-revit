@@ -2,6 +2,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Autodesk.Revit.UI;
 using RevitMCPCommandSet.Models.DataExtraction;
+using RevitMCPCommandSet.Utils;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.DataExtraction
@@ -55,11 +56,7 @@ namespace RevitMCPCommandSet.Services.DataExtraction
 
                     var roomData = new RoomDataModel
                     {
-#if REVIT2024_OR_GREATER
-                        Id = room.Id.Value,
-#else
-                        Id = room.Id.IntegerValue,
-#endif
+                        Id = room.Id.GetValue(),
                         UniqueId = room.UniqueId,
                         Name = room.get_Parameter(BuiltInParameter.ROOM_NAME)?.AsString() ?? "",
                         Number = room.Number ?? "",

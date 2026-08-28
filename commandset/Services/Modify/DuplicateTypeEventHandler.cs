@@ -1,6 +1,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using RevitMCPCommandSet.Models.Common;
+using RevitMCPCommandSet.Utils;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
@@ -43,11 +44,7 @@ namespace RevitMCPCommandSet.Services.Modify
                     trans.Start();
                     var newType = elementType.Duplicate(NewName);
                     trans.Commit();
-#if REVIT2024_OR_GREATER
-                    int newTypeId = (int)newType.Id.Value;
-#else
-                    int newTypeId = newType.Id.IntegerValue;
-#endif
+                    int newTypeId = newType.Id.GetIntValue();
                     Result = new AIResult<int> { Success = true, Response = newTypeId };
                 }
             }

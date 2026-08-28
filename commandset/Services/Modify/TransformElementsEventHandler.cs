@@ -2,6 +2,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Newtonsoft.Json.Linq;
 using RevitMCPCommandSet.Models.Common;
+using RevitMCPCommandSet.Utils;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
@@ -21,7 +22,7 @@ namespace RevitMCPCommandSet.Services.Modify
             ElementIds = elementIds;
             TransformType = transformType;
             TransformParams = transformParams;
-            _resetEvent.Reset();
+            _resetEvent.Reset(); 
         }
 
         public void Execute(UIApplication app)
@@ -51,11 +52,7 @@ namespace RevitMCPCommandSet.Services.Modify
                             double dy = TransformParams["dy"]?.Value<double>() ?? 0;
                             double dz = TransformParams["dz"]?.Value<double>() ?? 0;
                             var copied = ElementTransformUtils.CopyElements(Doc, ids, new XYZ(dx, dy, dz));
-#if REVIT2024_OR_GREATER
-                            newIds = copied.Select(id => (int)id.Value).ToList();
-#else
-                            newIds = copied.Select(id => id.IntegerValue).ToList();
-#endif
+                            newIds = copied.Select(id => id.GetIntValue()).ToList();
                             break;
                         }
                         case "rotate":

@@ -1,6 +1,7 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using RevitMCPCommandSet.Models.Common;
+using RevitMCPCommandSet.Utils;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Query
@@ -54,8 +55,8 @@ namespace RevitMCPCommandSet.Services.Query
                         {
                             collisions.Add(new
                             {
-                                ElementId1 = elementIds[i].IntegerValue,
-                                ElementId2 = elementIds[j].IntegerValue,
+                                ElementId1 = elementIds[i].GetIntValue(),
+                                ElementId2 = elementIds[j].GetIntValue(),
                                 IntersectionType = result.ToString(),
                                 Element1Name = elem1.Name,
                                 Element2Name = elem2.Name,
