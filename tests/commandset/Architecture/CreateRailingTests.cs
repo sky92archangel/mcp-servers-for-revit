@@ -40,7 +40,7 @@ public class CreateRailingTests : RevitApiTest
         using var tx = new Transaction(_doc, "Create Railing");
         tx.Start();
         var line = Line.CreateBound(new XYZ(0, 0, 0), new XYZ(10, 0, 0));
-#if REVIT2023_OR_GREATER
+#if !REVIT2025_OR_GREATER
         var railing = Railing.Create(_doc, line, _railingType.Id, _level.Id);
 #else
         var loop = new CurveLoop();
@@ -60,7 +60,7 @@ public class CreateRailingTests : RevitApiTest
         {
             tx.Start();
             var line = Line.CreateBound(new XYZ(20, 0, 0), new XYZ(25, 0, 0));
-#if REVIT2023_OR_GREATER
+#if !REVIT2025_OR_GREATER
             Railing.Create(_doc, line, _railingType.Id, _level.Id);
 #else
             var loop = new CurveLoop();

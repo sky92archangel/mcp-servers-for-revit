@@ -23,6 +23,9 @@ public class CreateSheetTests : RevitApiTest
             .Cast<FamilySymbol>()
             .FirstOrDefault(fs => fs.Category?.BuiltInCategory == BuiltInCategory.OST_TitleBlocks);
         _titleBlockId = titleBlock?.Id ?? ElementId.InvalidElementId;
+#if !REVIT2026_OR_GREATER
+        _titleBlockId = titleBlock?.Id ?? ElementId.InvalidElementId;
+#endif
         tx.Commit();
     }
 

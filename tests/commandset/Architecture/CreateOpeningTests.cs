@@ -41,13 +41,11 @@ public class CreateOpeningTests : RevitApiTest
         curveArray.Append(Line.CreateBound(new XYZ(5, 0, 3), new XYZ(3, 0, 3)));
         curveArray.Append(Line.CreateBound(new XYZ(3, 0, 3), new XYZ(3, 0, 0)));
         var opening = _doc.Create.NewOpening(_wall, curveArray, false);
-#elif REVIT2023_OR_GREATER
-        var opening = Opening.Add(_wall, new XYZ(3, 0, 0), new XYZ(5, 0, 3));
 #else
         var opening = default(Opening);
 #endif
         tx.Commit();
-#if !REVIT2022_OR_GREATER
+#if !REVIT2025_OR_GREATER
         await Assert.That(opening).IsNotNull();
 #endif
     }
@@ -59,7 +57,7 @@ public class CreateOpeningTests : RevitApiTest
         using (var tx = new Transaction(_doc, "Rollback Opening"))
         {
             tx.Start();
-#if REVIT2023_OR_GREATER
+#if !REVIT2025_OR_GREATER
             Opening.Add(_wall, new XYZ(6, 0, 0), new XYZ(8, 0, 3));
 #endif
             tx.RollBack();

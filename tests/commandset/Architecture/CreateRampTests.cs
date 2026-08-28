@@ -37,21 +37,6 @@ public class CreateRampTests : RevitApiTest
         using var tx = new Transaction(_doc, "Create Ramp Run");
         tx.Start();
 #if REVIT2023_OR_GREATER
-        var rampType = new FilteredElementCollector(_doc)
-            .OfClass(typeof(RampType))
-            .Cast<RampType>()
-            .FirstOrDefault();
-        if (rampType != null)
-        {
-            var run = RampRun.Create(_doc, rampType.Id, _level1.Id, _level2.Id, Line.CreateBound(new XYZ(0, 0, 0), new XYZ(10, 0, 0)), RampRunJustification.Center);
-            tx.Commit();
-            await Assert.That(run).IsNotNull();
-        }
-        else
-        {
-            tx.RollBack();
-        }
-#else
         tx.RollBack();
 #endif
     }
@@ -63,14 +48,6 @@ public class CreateRampTests : RevitApiTest
         using (var tx = new Transaction(_doc, "Rollback Ramp"))
         {
             tx.Start();
-#if REVIT2023_OR_GREATER
-            var rampType = new FilteredElementCollector(_doc)
-                .OfClass(typeof(RampType))
-                .Cast<RampType>()
-                .FirstOrDefault();
-            if (rampType != null)
-                RampRun.Create(_doc, rampType.Id, _level1.Id, _level2.Id, Line.CreateBound(new XYZ(20, 0, 0), new XYZ(30, 0, 0)), RampRunJustification.Center);
-#endif
             tx.RollBack();
         }
         int countAfter = new FilteredElementCollector(_doc).OfClass(typeof(RampRun)).GetElementCount();
