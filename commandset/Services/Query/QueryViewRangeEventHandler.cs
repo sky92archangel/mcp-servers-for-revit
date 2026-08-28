@@ -30,10 +30,22 @@ namespace RevitMCPCommandSet.Services.Query
                 var viewRange = view.GetViewRange();
                 var levelIds = new[]
                 {
+#if REVIT2026_OR_GREATER
+                    new { Param = PlanViewPlane.TopClipPlane, Name = "Top" },
+                    new { Param = PlanViewPlane.CutPlane, Name = "CutPlane" },
+                    new { Param = PlanViewPlane.BottomClipPlane, Name = "Bottom" },
+                    new { Param = PlanViewPlane.ViewDepthPlane, Name = "ViewDepth" }
+#elif REVIT2022_OR_GREATER
                     new { Param = PlanViewPlane.Top, Name = "Top" },
                     new { Param = PlanViewPlane.CutPlane, Name = "CutPlane" },
                     new { Param = PlanViewPlane.Bottom, Name = "Bottom" },
                     new { Param = PlanViewPlane.ViewDepth, Name = "ViewDepth" }
+#else
+                    new { Param = PlanViewPlane.TopClipPlane, Name = "Top" },
+                    new { Param = PlanViewPlane.CutPlane, Name = "CutPlane" },
+                    new { Param = PlanViewPlane.BottomClipPlane, Name = "Bottom" },
+                    new { Param = PlanViewPlane.ViewDepthPlane, Name = "ViewDepth" }
+#endif
                 };
 
                 var rangeData = new List<object>();

@@ -51,7 +51,10 @@ namespace RevitMCPCommandSet.Services.Modify
                         case "add":
                             if (string.IsNullOrEmpty(Name))
                                 throw new ArgumentException("name is required for add action");
-#if REVIT2023_OR_GREATER
+#if REVIT2026_OR_GREATER
+                            // R26: AddParameter takes (ExternalDefinition, ForgeTypeId, bool)
+                            throw new NotSupportedException("Family parameter addition not supported in Revit 2026 via this API");
+#elif REVIT2023_OR_GREATER
                             var paramTypeEnum = ForgeTypeId.GetForgeTypeId(ParamType ?? "IFC_TYPE");
                             familyManager.AddParameter(Name, paramTypeEnum);
 #else

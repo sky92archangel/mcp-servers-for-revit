@@ -88,7 +88,7 @@ namespace RevitMCPCommandSet.Services.Architecture
 
                             IList<CurveLoop> curveLoops = new List<CurveLoop> { curveLoop };
 
-                            Floor floor = Floor.Create(_doc, curveLoops, floorType.Id, level.Id);
+                            Floor floor = VersionCompat.CreateFloor(_doc, curveLoops, floorType.Id, level.Id);
 
                             if (floor != null)
                             {

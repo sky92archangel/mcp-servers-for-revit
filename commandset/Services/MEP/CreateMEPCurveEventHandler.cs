@@ -69,7 +69,7 @@ namespace RevitMCPCommandSet.Services.MEP
                                     .FirstOrDefault(dst => dst.Name.Contains(SystemType));
                             }
 
-                            Duct duct = Duct.Create(doc, ductSystemType?.Id ?? ElementId.InvalidElementId, startPt, endPt, ElementId.InvalidElementId);
+                            Duct duct = VersionCompat.CreateDuct(doc, ductSystemType?.Id ?? ElementId.InvalidElementId, startPt, endPt, ElementId.InvalidElementId);
                             if (duct != null)
                             {
                                 duct.get_Parameter(BuiltInParameter.RBS_CURVE_DIAMETER_PARAM)?.Set(diameterFt);
@@ -79,8 +79,7 @@ namespace RevitMCPCommandSet.Services.MEP
                         }
                         case "pipe":
                         {
-                            PipeSchedule pipeSchedule = null;
-                            Pipe pipe = Pipe.Create(doc, ElementId.InvalidElementId, startPt, endPt, ElementId.InvalidElementId);
+                            Pipe pipe = VersionCompat.CreatePipe(doc, ElementId.InvalidElementId, startPt, endPt, ElementId.InvalidElementId);
                             if (pipe != null)
                             {
                                 pipe.get_Parameter(BuiltInParameter.RBS_PIPE_DIAMETER_PARAM)?.Set(diameterFt);
@@ -90,7 +89,7 @@ namespace RevitMCPCommandSet.Services.MEP
                         }
                         case "conduit":
                         {
-                            Conduit conduit = Conduit.Create(doc, ElementId.InvalidElementId, startPt, endPt, ElementId.InvalidElementId);
+                            var conduit = VersionCompat.CreateConduit(doc, ElementId.InvalidElementId, startPt, endPt, ElementId.InvalidElementId) as MEPCurve;
                             if (conduit != null)
                             {
                                 conduit.get_Parameter(BuiltInParameter.RBS_CONDUIT_DIAMETER_PARAM)?.Set(diameterFt);

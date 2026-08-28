@@ -1,6 +1,5 @@
 using RevitMCPCommandSet.Models.Architecture;
 using RevitMCPSDK.API.Interfaces;
-using Point = RevitMCPCommandSet.Models.Common.JZPoint;
 
 namespace RevitMCPCommandSet.Services.Architecture
 {

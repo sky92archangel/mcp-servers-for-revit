@@ -39,7 +39,7 @@ namespace RevitMCPCommandSet.Services.Views
                         return;
                     }
 
-                    ElementId templateId = View.CreateViewTemplate(doc, sourceView.Id);
+                    ElementId templateId = VersionCompat.CreateViewTemplate(doc, sourceView.Id);
                     View templateView = doc.GetElement(templateId) as View;
 
                     if (!string.IsNullOrEmpty(TemplateName) && templateView != null)

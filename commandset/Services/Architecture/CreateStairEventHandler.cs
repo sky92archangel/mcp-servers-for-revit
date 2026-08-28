@@ -39,40 +39,46 @@ namespace RevitMCPCommandSet.Services.Architecture
                     Level topLevel = FindNearestLevel(info.TopLevel / 304.8);
                     if (baseLevel == null || topLevel == null) continue;
 
-                    StairsType stairsType = null;
-                    if (info.TypeId > 0)
-                    {
-                        stairsType = _doc.GetElement(new ElementId(info.TypeId)) as StairsType;
-                    }
-
-                    if (stairsType == null && !string.IsNullOrEmpty(info.StairType))
-                    {
-                        stairsType = new FilteredElementCollector(_doc)
-                            .OfClass(typeof(StairsType))
-                            .Cast<StairsType>()
-                            .FirstOrDefault(st => st.Name.Equals(info.StairType, StringComparison.OrdinalIgnoreCase));
-                        if (stairsType == null)
-                        {
-                            _warnings.Add($"Stair type '{info.StairType}' not found, using first available");
-                        }
-                    }
-
-                    if (stairsType == null)
-                    {
-                        stairsType = new FilteredElementCollector(_doc)
-                            .OfClass(typeof(StairsType))
-                            .Cast<StairsType>()
-                            .FirstOrDefault();
-                    }
-
-                    if (stairsType == null) continue;
-
                     using (Transaction tx = new Transaction(_doc, "Create Stair"))
                     {
                         tx.Start();
 
                         try
                         {
+#if REVIT2026_OR_GREATER
+                            // R26: Stairs API changed significantly
+                            _warnings.Add("Stair creation not yet supported in Revit 2026");
+                            tx.RollBack();
+                            continue;
+#elif REVIT2022_OR_GREATER
+                            StairsType stairsType = null;
+                            if (info.TypeId > 0)
+                            {
+                                stairsType = _doc.GetElement(new ElementId(info.TypeId)) as StairsType;
+                            }
+
+                            if (stairsType == null && !string.IsNullOrEmpty(info.StairType))
+                            {
+                                stairsType = new FilteredElementCollector(_doc)
+                                    .OfClass(typeof(StairsType))
+                                    .Cast<StairsType>()
+                                    .FirstOrDefault(st => st.Name.Equals(info.StairType, StringComparison.OrdinalIgnoreCase));
+                                if (stairsType == null)
+                                {
+                                    _warnings.Add($"Stair type '{info.StairType}' not found, using first available");
+                                }
+                            }
+
+                            if (stairsType == null)
+                            {
+                                stairsType = new FilteredElementCollector(_doc)
+                                    .OfClass(typeof(StairsType))
+                                    .Cast<StairsType>()
+                                    .FirstOrDefault();
+                            }
+
+                            if (stairsType == null) { tx.RollBack(); continue; }
+
                             // Build stair runs
                             IList<StairsRun> runs = new List<StairsRun>();
                             IList<StairsLanding> landings = new List<StairsLanding>();
@@ -102,7 +108,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                 runs.Add(run);
                             }
 
-                            if (runs.Count == 0) continue;
+                            if (runs.Count == 0) { tx.RollBack(); continue; }
 
                             // Create landing if needed
                             if (info.HasLanding && runs.Count > 1)
@@ -122,11 +128,15 @@ namespace RevitMCPCommandSet.Services.Architecture
                             }
 
                             Stairs stair = Stairs.Create(_doc, stairsType.Id, baseLevel.Id, topLevel.Id, runs, landings);
-
                             if (stair != null)
                             {
                                 elementIds.Add(stair.Id.GetIntValue());
                             }
+#else
+                            _warnings.Add("Stair creation requires Revit 2022 or later");
+                            tx.RollBack();
+                            continue;
+#endif
 
                             tx.Commit();
                         }

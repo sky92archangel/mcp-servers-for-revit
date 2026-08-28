@@ -1,6 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Query
@@ -62,7 +59,7 @@ namespace RevitMCPCommandSet.Services.Query
                                 Type = "Face",
                                 Reference = face.Reference.ConvertToStableRepresentation(Doc),
                                 Area = face.Area,
-                                SurfaceType = face.SurfaceType.ToString()
+                                SurfaceType = VersionCompat.GetSurfaceTypeName(face)
                             });
                         }
                         foreach (EdgeArray edgeArray in face.EdgeLoops)

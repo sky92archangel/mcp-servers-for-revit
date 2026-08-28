@@ -1,4 +1,3 @@
-using Newtonsoft.Json.Linq;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
@@ -124,7 +123,32 @@ namespace RevitMCPCommandSet.Services.Modify
                         var catSet = new CategorySet();
                         foreach (var catName in categoryNames)
                         {
+#if REVIT2026_OR_GREATER
+                            // R26: Category.GetCategory(Document, ElementId)
+                            Category cat = null;
+                            var allCats = Doc.Settings.Categories;
+                            foreach (Category c in allCats)
+                            {
+                                if (c.Name.Equals(catName, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    cat = c;
+                                    break;
+                                }
+                            }
+#elif REVIT2023_OR_GREATER
                             Category cat = Category.GetCategory(Doc, catName);
+#else
+                            Category cat = null;
+                            var allCats = Doc.Settings.Categories;
+                            foreach (Category c in allCats)
+                            {
+                                if (c.Name.Equals(catName, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    cat = c;
+                                    break;
+                                }
+                            }
+#endif
                             if (cat != null)
                                 catSet.Insert(cat);
                         }
@@ -137,10 +161,13 @@ namespace RevitMCPCommandSet.Services.Modify
                         newBinding.Categories = catSet;
                     }
 
-#if REVIT2023_OR_GREATER
+#if REVIT2026_OR_GREATER
+                    // R26: BuiltInParameterGroup removed, use ForgeTypeId
+                    bindingMap.Insert(sharedParam, newBinding);
+#elif REVIT2023_OR_GREATER
                     bindingMap.Insert(sharedParam, newBinding, BuiltInParameterGroup.PG_DATA);
 #else
-                    bindingMap.Insert(sharedParam, newBinding, ParameterGroup.PG_DATA);
+                    bindingMap.Insert(sharedParam, newBinding, (ParameterGroup)BuiltInParameterGroup.PG_DATA);
 #endif
                 }
                 trans.Commit();

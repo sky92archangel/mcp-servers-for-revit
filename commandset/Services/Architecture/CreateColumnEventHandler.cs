@@ -63,7 +63,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                             .OfClass(typeof(FamilySymbol))
                             .Cast<FamilySymbol>()
                             .FirstOrDefault(fs => fs.FamilyName != null &&
-                                fs.Category?.BuiltInCategory == BuiltInCategory.OST_StructuralColumns);
+                                fs.Category != null && VersionCompat.GetBuiltInCategory(fs.Category) == BuiltInCategory.OST_StructuralColumns);
                     }
 
                     if (symbol == null) continue;
@@ -87,6 +87,14 @@ namespace RevitMCPCommandSet.Services.Architecture
                             if (column != null)
                             {
                                 // Set column height if specified
+#if REVIT2026_OR_GREATER
+                                if (info.Height > 0)
+                                {
+                                    // R26: COLUMN_HEIGHT removed, set height via Location
+                                    double heightFt = info.Height / 304.8;
+                                    column.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM)?.Set(heightFt);
+                                }
+#elif REVIT2022_OR_GREATER
                                 if (info.Height > 0)
                                 {
                                     Parameter heightParam = column.get_Parameter(BuiltInParameter.COLUMN_HEIGHT);
@@ -95,6 +103,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                         heightParam.Set(info.Height / 304.8);
                                     }
                                 }
+#endif
 
                                 elementIds.Add(column.Id.GetIntValue());
                             }

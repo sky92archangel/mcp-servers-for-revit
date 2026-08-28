@@ -79,7 +79,7 @@ namespace RevitMCPCommandSet.Services.MEP
               if (data.ElementIds != null && data.ElementIds.Count > 0)
               {
                 List<ElementId> elemIds = data.ElementIds.Select(id => new ElementId(id)).ToList();
-                system.AddElements(elemIds);
+                VersionCompat.AddElementsToMEPSystem(system, elemIds);
               }
 
               systemIds.Add(system.Id.GetIntValue());
@@ -122,22 +122,36 @@ namespace RevitMCPCommandSet.Services.MEP
       switch (systemType.ToLower())
       {
         case "supplyair":
-          bic = BuiltInCategory.OST_MEPSystems;
-          break;
         case "returnair":
-          bic = BuiltInCategory.OST_MEPSystems;
-          break;
         case "exhaustair":
+#if REVIT2026_OR_GREATER
+          // R26: OST_MEPSystems removed, use MechanicalSystem filter
+          var mechTypes = new FilteredElementCollector(doc)
+              .OfClass(typeof(MechanicalSystemType))
+              .Cast<MechanicalSystemType>()
+              .FirstOrDefault(st => st.Name.Equals(systemType, StringComparison.OrdinalIgnoreCase));
+          return mechTypes?.Id ?? ElementId.InvalidElementId;
+#elif REVIT2022_OR_GREATER
           bic = BuiltInCategory.OST_MEPSystems;
+#else
+          return ElementId.InvalidElementId;
+#endif
           break;
         case "sanitary":
-          bic = BuiltInCategory.OST_PipingSystems;
-          break;
         case "hydronicsupply":
-          bic = BuiltInCategory.OST_PipingSystems;
-          break;
         case "hydronicreturn":
+#if REVIT2026_OR_GREATER
+          // R26: OST_PipingSystems removed, use PipingSystem filter
+          var pipeTypes = new FilteredElementCollector(doc)
+              .OfClass(typeof(PipingSystemType))
+              .Cast<PipingSystemType>()
+              .FirstOrDefault(st => st.Name.Equals(systemType, StringComparison.OrdinalIgnoreCase));
+          return pipeTypes?.Id ?? ElementId.InvalidElementId;
+#elif REVIT2022_OR_GREATER
           bic = BuiltInCategory.OST_PipingSystems;
+#else
+          return ElementId.InvalidElementId;
+#endif
           break;
         default:
           return ElementId.InvalidElementId;

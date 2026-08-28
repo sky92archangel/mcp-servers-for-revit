@@ -150,14 +150,14 @@ namespace RevitMCPCommandSet.Services.Views
         private View Create3DView(ViewCreationInfo info)
         {
             View3D view3D = null;
-            FilteredElementCollector collector = new FilteredElementCollector(doc)
+            ViewFamilyType vft = new FilteredElementCollector(doc)
                 .OfClass(typeof(ViewFamilyType))
                 .Cast<ViewFamilyType>()
-                .FirstOrDefault(vft => vft.ViewFamily == ViewFamily.ThreeDimensional);
+                .FirstOrDefault(vftype => vftype.ViewFamily == ViewFamily.ThreeDimensional);
 
-            if (collector != null)
+            if (vft != null)
             {
-                view3D = View3D.CreateIsometric(doc, collector.Id);
+                view3D = View3D.CreateIsometric(doc, vft.Id);
             }
 
             return view3D;
@@ -226,11 +226,24 @@ namespace RevitMCPCommandSet.Services.Views
 
             if (vft == null) return null;
 
+#if REVIT2026_OR_GREATER
+            // R26: CreateElevationMarker(Document, ElementId, XYZ, int)
+            ElevationMarker marker = ElevationMarker.CreateElevationMarker(doc, vft.Id, new XYZ(0, 0, level.Elevation), 100);
+
+            if (marker != null)
+            {
+                ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, 0);
+#elif REVIT2022_OR_GREATER
             ElevationMarker marker = ElevationMarker.CreateElevationMarker(doc, vft.Id, level.Id, new XYZ(0, 0, level.Elevation));
 
             if (marker != null)
             {
-                ViewSection elevationView = marker.CreateElevationView(level.Id, 0);
+                ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, 0);
+#else
+            ViewSection elevationView = ViewSection.CreateElevation(doc, level.Id, vft.Id, new XYZ(0, 0, level.Elevation), 0);
+            if (elevationView != null)
+            {
+#endif
 
                 if (info.Direction != null)
                 {

@@ -87,7 +87,7 @@ namespace RevitMCPCommandSet.Services.Architecture
 
                             IList<CurveLoop> curveLoops = new List<CurveLoop> { curveLoop };
 
-                            Ceiling ceiling = Ceiling.Create(_doc, curveLoops, ceilingType.Id, level.Id);
+                            Ceiling ceiling = VersionCompat.CreateCeiling(_doc, curveLoops, ceilingType.Id, level.Id);
 
                             if (ceiling != null)
                             {

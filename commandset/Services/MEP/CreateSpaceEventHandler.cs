@@ -48,7 +48,7 @@ namespace RevitMCPCommandSet.Services.MEP
             }
 
             XYZ point = JZPoint.ToXYZ(data.Location);
-            Space space = Space.Create(doc, level.Id, point);
+            Space space = VersionCompat.CreateSpace(doc, level.Id, point);
 
             if (space != null)
             {

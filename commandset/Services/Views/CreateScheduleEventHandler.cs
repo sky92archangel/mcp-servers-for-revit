@@ -82,31 +82,47 @@ namespace RevitMCPCommandSet.Services.Views
                             }
 
                             if (info.ShowTitle.HasValue)
+                            {
+#if REVIT2026_OR_GREATER
+                                Parameter titleParam = schedule.LookupParameter("Show Title");
+                                titleParam?.Set(info.ShowTitle.Value ? 1 : 0);
+#elif REVIT2022_OR_GREATER
                                 schedule.get_Parameter(BuiltInParameter.VIEW_TITLE_VISIBLE)?.Set(info.ShowTitle.Value ? 1 : 0);
+#endif
+                            }
 
                             if (info.ShowHeaders.HasValue)
                             {
-#if REVIT2024_OR_GREATER
+#if REVIT2026_OR_GREATER
+                                Parameter p = schedule.LookupParameter("Show Headers");
+                                p?.Set(info.ShowHeaders.Value ? 1 : 0);
+#elif REVIT2025_OR_GREATER
                                 schedule.ShowHeaders = info.ShowHeaders.Value;
-#else
+#elif REVIT2022_OR_GREATER
                                 schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_HEADER)?.Set(info.ShowHeaders.Value ? 1 : 0);
 #endif
                             }
 
                             if (info.ShowGridLines.HasValue)
                             {
-#if REVIT2024_OR_GREATER
+#if REVIT2026_OR_GREATER
+                                Parameter p = schedule.LookupParameter("Show Grid Lines");
+                                p?.Set(info.ShowGridLines.Value ? 1 : 0);
+#elif REVIT2025_OR_GREATER
                                 schedule.ShowGridLines = info.ShowGridLines.Value;
-#else
+#elif REVIT2022_OR_GREATER
                                 schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_GRID_LINES)?.Set(info.ShowGridLines.Value ? 1 : 0);
 #endif
                             }
 
                             if (info.ShowOutlines.HasValue)
                             {
-#if REVIT2024_OR_GREATER
+#if REVIT2026_OR_GREATER
+                                Parameter p = schedule.LookupParameter("Show Outlines");
+                                p?.Set(info.ShowOutlines.Value ? 1 : 0);
+#elif REVIT2025_OR_GREATER
                                 schedule.ShowOutlines = info.ShowOutlines.Value;
-#else
+#elif REVIT2022_OR_GREATER
                                 schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_OUTLINES)?.Set(info.ShowOutlines.Value ? 1 : 0);
 #endif
                             }
@@ -224,12 +240,15 @@ namespace RevitMCPCommandSet.Services.Views
                     return new ElementId((int)bic);
                 }
 
-                Category matchedCat = new FilteredElementCollector(doc)
-                    .OfClass(typeof(ProjectInfo))
-                    .ToElements()
-                    .SelectMany(_ => doc.Settings.Categories)
-                    .Cast<Category>()
-                    .FirstOrDefault(c => c.Name != null && c.Name.Equals(info.CategoryName, StringComparison.OrdinalIgnoreCase));
+                Category matchedCat = null;
+                foreach (Category c in doc.Settings.Categories)
+                {
+                    if (c.Name != null && c.Name.Equals(info.CategoryName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        matchedCat = c;
+                        break;
+                    }
+                }
 
                 if (matchedCat != null) return matchedCat.Id;
 

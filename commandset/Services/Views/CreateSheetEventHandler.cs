@@ -117,7 +117,11 @@ namespace RevitMCPCommandSet.Services.Views
                                     Element revElem = doc.GetElement(new ElementId(revId));
                                     if (revElem is Revision)
                                     {
+#if REVIT2026_OR_GREATER
+                                        // R26: AddRevision removed, revisions managed via sheet parameters
+#elif REVIT2022_OR_GREATER
                                         sheet.AddRevision(new ElementId(revId));
+#endif
                                     }
                                 }
                             }

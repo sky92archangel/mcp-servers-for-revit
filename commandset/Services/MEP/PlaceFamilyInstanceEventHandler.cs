@@ -172,7 +172,7 @@ namespace RevitMCPCommandSet.Services.MEP
           if (ir != null && ir.Distance < closestDist)
           {
             closestDist = ir.Distance;
-            closestRef = ir.Reference;
+            closestRef = VersionCompat.GetIntersectionReference(ir);
           }
         }
       }

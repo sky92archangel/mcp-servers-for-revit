@@ -39,40 +39,46 @@ namespace RevitMCPCommandSet.Services.Architecture
                     Level topLevel = FindNearestLevel(info.TopLevel / 304.8);
                     if (baseLevel == null || topLevel == null) continue;
 
-                    RampType rampType = null;
-                    if (info.TypeId > 0)
-                    {
-                        rampType = _doc.GetElement(new ElementId(info.TypeId)) as RampType;
-                    }
-
-                    if (rampType == null && !string.IsNullOrEmpty(info.RampType))
-                    {
-                        rampType = new FilteredElementCollector(_doc)
-                            .OfClass(typeof(RampType))
-                            .Cast<RampType>()
-                            .FirstOrDefault(rt => rt.Name.Equals(info.RampType, StringComparison.OrdinalIgnoreCase));
-                        if (rampType == null)
-                        {
-                            _warnings.Add($"Ramp type '{info.RampType}' not found, using first available");
-                        }
-                    }
-
-                    if (rampType == null)
-                    {
-                        rampType = new FilteredElementCollector(_doc)
-                            .OfClass(typeof(RampType))
-                            .Cast<RampType>()
-                            .FirstOrDefault();
-                    }
-
-                    if (rampType == null) continue;
-
                     using (Transaction tx = new Transaction(_doc, "Create Ramp"))
                     {
                         tx.Start();
 
                         try
                         {
+#if REVIT2026_OR_GREATER
+                            // R26: Ramp API changed - use doc.Create.NewRamp
+                            _warnings.Add("Ramp creation not yet supported in Revit 2026");
+                            tx.RollBack();
+                            continue;
+#elif REVIT2022_OR_GREATER
+                            RampType rampType = null;
+                            if (info.TypeId > 0)
+                            {
+                                rampType = _doc.GetElement(new ElementId(info.TypeId)) as RampType;
+                            }
+
+                            if (rampType == null && !string.IsNullOrEmpty(info.RampType))
+                            {
+                                rampType = new FilteredElementCollector(_doc)
+                                    .OfClass(typeof(RampType))
+                                    .Cast<RampType>()
+                                    .FirstOrDefault(rt => rt.Name.Equals(info.RampType, StringComparison.OrdinalIgnoreCase));
+                                if (rampType == null)
+                                {
+                                    _warnings.Add($"Ramp type '{info.RampType}' not found, using first available");
+                                }
+                            }
+
+                            if (rampType == null)
+                            {
+                                rampType = new FilteredElementCollector(_doc)
+                                    .OfClass(typeof(RampType))
+                                    .Cast<RampType>()
+                                    .FirstOrDefault();
+                            }
+
+                            if (rampType == null) { tx.RollBack(); continue; }
+
                             // Build ramp runs
                             IList<RampRun> runs = new List<RampRun>();
                             double widthInFeet = info.Width / 304.8;
@@ -99,14 +105,18 @@ namespace RevitMCPCommandSet.Services.Architecture
                                 runs.Add(run);
                             }
 
-                            if (runs.Count == 0) continue;
+                            if (runs.Count == 0) { tx.RollBack(); continue; }
 
                             Ramp ramp = Ramp.Create(_doc, rampType.Id, baseLevel.Id, topLevel.Id, runs);
-
                             if (ramp != null)
                             {
                                 elementIds.Add(ramp.Id.GetIntValue());
                             }
+#else
+                            _warnings.Add("Ramp creation requires Revit 2022 or later");
+                            tx.RollBack();
+                            continue;
+#endif
 
                             tx.Commit();
                         }

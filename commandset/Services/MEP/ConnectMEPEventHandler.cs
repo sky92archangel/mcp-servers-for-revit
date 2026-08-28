@@ -168,10 +168,6 @@ namespace RevitMCPCommandSet.Services.MEP
       {
         manager = fi.MEPModel?.ConnectorManager;
       }
-      else if (elem is FamilyInstance fi2)
-      {
-        manager = fi2.MEPModel?.ConnectorManager;
-      }
 
       return manager?.Connectors;
     }

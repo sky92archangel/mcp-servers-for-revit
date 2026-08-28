@@ -1,6 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
@@ -21,6 +18,7 @@ namespace RevitMCPCommandSet.Services.Views
         public int? TopLevelId { get; private set; }
 
         public AIResult<bool> Result { get; private set; }
+        private List<string> _warnings = new List<string>();
 
         public void SetParameters(int viewId, double topOffset, double cutOffset, double bottomOffset, double viewDepthOffset, int? topLevelId)
         {
@@ -50,6 +48,26 @@ namespace RevitMCPCommandSet.Services.Views
                         return;
                     }
 
+#if REVIT2026_OR_GREATER
+                    // R26: ViewRange type removed, use parameter-based approach
+                    if (TopLevelId.HasValue)
+                    {
+                        ElementId levelId = new ElementId(TopLevelId.Value);
+                        viewPlan.get_Parameter(BuiltInParameter.PLAN_VIEW_LEVEL)?.Set(levelId);
+                    }
+
+                    double offsetFt = TopOffset / 304.8;
+                    viewPlan.get_Parameter(BuiltInParameter.VIEWER_BOUND_OFFSET_TOP)?.Set(offsetFt);
+
+                    offsetFt = CutOffset / 304.8;
+                    viewPlan.get_Parameter(BuiltInParameter.VIEWER_BOUND_OFFSET_BOTTOM)?.Set(offsetFt);
+
+                    offsetFt = BottomOffset / 304.8;
+                    viewPlan.get_Parameter(BuiltInParameter.VIEWER_BOUND_OFFSET_BOTTOM)?.Set(offsetFt);
+
+                    offsetFt = ViewDepthOffset / 304.8;
+                    viewPlan.get_Parameter(BuiltInParameter.VIEW_DEPTH)?.Set(offsetFt);
+#elif REVIT2022_OR_GREATER
                     ViewRange viewRange = viewPlan.GetViewRange();
 
                     if (TopLevelId.HasValue)
@@ -71,6 +89,9 @@ namespace RevitMCPCommandSet.Services.Views
                     viewRange.SetOffset(PlanViewPlane.ViewDepthPlane, offsetFt);
 
                     viewPlan.SetViewRange(viewRange);
+#else
+                    _warnings.Add("View range setting requires Revit 2022 or later");
+#endif
 
                     trans.Commit();
 

@@ -1,6 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPCommandSet.Models.Views;
 using RevitMCPSDK.API.Interfaces;
 
@@ -70,12 +67,20 @@ namespace RevitMCPCommandSet.Services.Views
                 imgOpts.ZoomType = ZoomFitType.FitToPage;
                 imgOpts.PixelSize = 1024;
                 imgOpts.ImageResolution = ImageResolution.DPI_150;
+#if REVIT2026_OR_GREATER
+                // R26: HLRScale and Format removed from ImageExportOptions
+#elif REVIT2025_OR_GREATER
                 imgOpts.HLRScale = false;
+#endif
                 imgOpts.ExportRange = ExportRange.SetOfViews;
                 imgOpts.SetViewsAndSheets(new List<ElementId> { elemId });
+#if REVIT2026_OR_GREATER
+                // R26: Format removed from ImageExportOptions
+#elif REVIT2025_OR_GREATER
                 imgOpts.Format = data.Format.ToUpper() == "PNG"
                     ? ImageFileType.PNG
                     : ImageFileType.JPEGLossless;
+#endif
 
                 doc.ExportImage(imgOpts);
                 exportedFiles.Add($"{fileName}.{data.Format.ToLower()}");
@@ -85,7 +90,11 @@ namespace RevitMCPCommandSet.Services.Views
               case "DXF":
               {
                 DWGExportOptions dwgOpts = new DWGExportOptions();
+#if REVIT2026_OR_GREATER
+                // R26: ExportLayerTable removed from DWGExportOptions
+#elif REVIT2025_OR_GREATER
                 dwgOpts.ExportLayerTable = false;
+#endif
 
                 ICollection<ElementId> viewIds = new List<ElementId> { elemId };
                 doc.Export(folderPath, fileName, viewIds, dwgOpts);
@@ -94,10 +103,20 @@ namespace RevitMCPCommandSet.Services.Views
               }
               case "IFC":
               {
+#if REVIT2026_OR_GREATER
+                // R26: IFC export via different method
+                _warnings.Add("IFC export not supported in Revit 2026 via this API");
+#elif REVIT2022_OR_GREATER
                 IFCExportOptions ifcOpts = new IFCExportOptions();
 
                 ICollection<ElementId> viewIds = new List<ElementId> { elemId };
                 doc.Export(folderPath, fileName, viewIds, ifcOpts);
+#else
+                IFCExportOptions ifcOpts = new IFCExportOptions();
+
+                ICollection<ElementId> viewIds = new List<ElementId> { elemId };
+                doc.Export(folderPath, fileName, viewIds, ifcOpts);
+#endif
                 exportedFiles.Add($"{fileName}.ifc");
                 break;
               }

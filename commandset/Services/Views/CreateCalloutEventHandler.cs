@@ -67,7 +67,7 @@ namespace RevitMCPCommandSet.Services.Views
                         Max = maxPt
                     };
 
-                    ViewSection callout = ViewSection.CreateCallout(doc, hostView.Id, vft.Id, bbox);
+                    ViewSection callout = VersionCompat.CreateCallout(doc, hostView.Id, vft.Id, bbox);
 
                     if (!string.IsNullOrEmpty(ViewName))
                     {

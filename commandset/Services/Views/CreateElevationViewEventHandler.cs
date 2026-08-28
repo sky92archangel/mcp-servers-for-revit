@@ -66,10 +66,20 @@ namespace RevitMCPCommandSet.Services.Views
                         return;
                     }
 
+#if REVIT2026_OR_GREATER
+                    // R26: CreateElevationMarker(Document, ElementId, XYZ, int)
+                    ElevationMarker marker = ElevationMarker.CreateElevationMarker(doc, vft.Id, new XYZ(0, 0, level.Elevation), 100);
+
+                    int dirIndex = Math.Max(0, Math.Min(3, DirectionIndex));
+                    ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, dirIndex);
+#elif REVIT2022_OR_GREATER
                     ElevationMarker marker = ElevationMarker.CreateElevationMarker(doc, vft.Id, level.Id, new XYZ(0, 0, level.Elevation));
 
                     int dirIndex = Math.Max(0, Math.Min(3, DirectionIndex));
-                    ViewSection elevationView = marker.CreateElevationView(level.Id, dirIndex);
+                    ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, dirIndex);
+#else
+                    ViewSection elevationView = ViewSection.CreateElevation(doc, level.Id, vft.Id, new XYZ(0, 0, level.Elevation), 0);
+#endif
 
                     if (!string.IsNullOrEmpty(ViewName))
                     {

@@ -1,7 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using Newtonsoft.Json.Linq;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
@@ -38,7 +34,7 @@ namespace RevitMCPCommandSet.Services.Modify
                     trans.Start();
                     foreach (var prop in ParameterValues.Properties())
                     {
-                        var param = element.get_Parameter(prop.Name);
+                        var param = element.LookupParameter(prop.Name);
                         if (param == null)
                         {
                             param = LookupBuiltInParameter(element, prop.Name);

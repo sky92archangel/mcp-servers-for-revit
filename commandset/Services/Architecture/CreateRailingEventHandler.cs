@@ -89,11 +89,34 @@ namespace RevitMCPCommandSet.Services.Architecture
 
                             if (pathLine == null) continue;
 
+#if REVIT2026_OR_GREATER
+                            // R26: Railing.Create takes CurveLoop
+                            CurveLoop curveLoop = new CurveLoop();
+                            curveLoop.Append(pathLine);
+                            Railing railing = Railing.Create(_doc, curveLoop, railingType.Id, level.Id);
+#elif REVIT2022_OR_GREATER
                             Railing railing = Railing.Create(_doc, pathLine, railingType.Id, level.Id);
+#else
+                            // R20 uses CurveLoop-based Railing.Create
+                            CurveLoop curveLoop = new CurveLoop();
+                            curveLoop.Append(pathLine);
+                            Railing railing = Railing.Create(_doc, curveLoop, railingType.Id, level.Id);
+#endif
 
                             if (railing != null)
                             {
                                 // Set railing height if specified
+#if REVIT2026_OR_GREATER
+                                if (info.Height > 0 && info.Height != 1070)
+                                {
+                                    // R26: RAILING_HEIGHT removed, set via parameter lookup
+                                    Parameter heightParam = railing.LookupParameter("Height");
+                                    if (heightParam != null && !heightParam.IsReadOnly)
+                                    {
+                                        heightParam.Set(info.Height / 304.8);
+                                    }
+                                }
+#elif REVIT2022_OR_GREATER
                                 if (info.Height > 0 && info.Height != 1070)
                                 {
                                     Parameter heightParam = railing.get_Parameter(BuiltInParameter.RAILING_HEIGHT);
@@ -102,6 +125,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                         heightParam.Set(info.Height / 304.8);
                                     }
                                 }
+#endif
 
                                 elementIds.Add(railing.Id.GetIntValue());
                             }

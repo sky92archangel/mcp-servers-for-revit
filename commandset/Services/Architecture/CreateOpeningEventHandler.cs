@@ -68,27 +68,79 @@ namespace RevitMCPCommandSet.Services.Architecture
                                     location = VersionCompat.GetWallLocationCurve(hostWall)?.Evaluate(0.5, true);
                                 }
 
+#if REVIT2026_OR_GREATER
+                                // R26: _doc.Create.NewOpening takes CurveArray
+                                CurveArray curveArray = new CurveArray();
+                                curveArray.Append(Line.CreateBound(new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet),
+                                    new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet)));
+                                curveArray.Append(Line.CreateBound(new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet),
+                                    new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet)));
+                                curveArray.Append(Line.CreateBound(new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet),
+                                    new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet)));
+                                curveArray.Append(Line.CreateBound(new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet),
+                                    new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet)));
+                                opening = _doc.Create.NewOpening(hostWall, curveArray, false);
+#elif REVIT2022_OR_GREATER
                                 // Use Opening.Add for rectangular wall openings
                                 opening = Opening.Add(hostWall, new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet),
                                     new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet));
+#else
+                                _warnings.Add("Wall opening creation not supported in Revit 2020, skipping");
+#endif
                             }
                             else if (info.OpeningType == OpeningType.FloorOpening && hostElement is Floor)
                             {
                                 Floor hostFloor = hostElement as Floor;
                                 if (info.Shape == OpeningShape.Rectangular)
                                 {
+#if REVIT2026_OR_GREATER
+                                // R26: _doc.Create.NewOpening takes CurveArray, not XYZ
+                                CurveArray curveArray = new CurveArray();
+                                curveArray.Append(Line.CreateBound(new XYZ(0, 0, 0), new XYZ(widthInFeet, 0, 0)));
+                                curveArray.Append(Line.CreateBound(new XYZ(widthInFeet, 0, 0), new XYZ(widthInFeet, heightInFeet, 0)));
+                                curveArray.Append(Line.CreateBound(new XYZ(widthInFeet, heightInFeet, 0), new XYZ(0, heightInFeet, 0)));
+                                curveArray.Append(Line.CreateBound(new XYZ(0, heightInFeet, 0), new XYZ(0, 0, 0)));
+                                opening = _doc.Create.NewOpening(hostFloor, curveArray, false);
+#elif REVIT2022_OR_GREATER
                                     opening = Opening.Add(hostFloor, new XYZ(0, 0, 0), new XYZ(widthInFeet, heightInFeet, 0));
+#else
+                                    _warnings.Add("Floor opening creation not supported in Revit 2020, skipping");
+#endif
                                 }
                             }
                             else if (info.OpeningType == OpeningType.RoofOpening && hostElement is RoofBase)
                             {
                                 RoofBase hostRoof = hostElement as RoofBase;
+#if REVIT2026_OR_GREATER
+                                // R26: _doc.Create.NewOpening takes CurveArray
+                                CurveArray curveArray = new CurveArray();
+                                curveArray.Append(Line.CreateBound(new XYZ(0, 0, 0), new XYZ(widthInFeet, 0, 0)));
+                                curveArray.Append(Line.CreateBound(new XYZ(widthInFeet, 0, 0), new XYZ(widthInFeet, heightInFeet, 0)));
+                                curveArray.Append(Line.CreateBound(new XYZ(widthInFeet, heightInFeet, 0), new XYZ(0, heightInFeet, 0)));
+                                curveArray.Append(Line.CreateBound(new XYZ(0, heightInFeet, 0), new XYZ(0, 0, 0)));
+                                opening = _doc.Create.NewOpening(hostRoof, curveArray, false);
+#elif REVIT2022_OR_GREATER
                                 opening = Opening.Add(hostRoof, new XYZ(0, 0, 0), new XYZ(widthInFeet, heightInFeet, 0));
+#else
+                                _warnings.Add("Roof opening creation not supported in Revit 2020, skipping");
+#endif
                             }
                             else if (info.OpeningType == OpeningType.ShaftOpening)
                             {
                                 // For shafts, use NewOpening on ceiling/floor
+#if REVIT2026_OR_GREATER
+                                // R26: _doc.Create.NewOpening takes CurveArray
+                                CurveArray curveArray = new CurveArray();
+                                curveArray.Append(Line.CreateBound(new XYZ(0, 0, 0), new XYZ(widthInFeet, 0, 0)));
+                                curveArray.Append(Line.CreateBound(new XYZ(widthInFeet, 0, 0), new XYZ(widthInFeet, heightInFeet, 0)));
+                                curveArray.Append(Line.CreateBound(new XYZ(widthInFeet, heightInFeet, 0), new XYZ(0, heightInFeet, 0)));
+                                curveArray.Append(Line.CreateBound(new XYZ(0, heightInFeet, 0), new XYZ(0, 0, 0)));
+                                opening = _doc.Create.NewOpening(hostElement as CeilingAndFloor, curveArray, false);
+#elif REVIT2022_OR_GREATER
                                 opening = Opening.Add(hostElement as CeilingAndFloor, new XYZ(0, 0, 0), new XYZ(widthInFeet, heightInFeet, 0));
+#else
+                                _warnings.Add("Shaft opening creation not supported in Revit 2020, skipping");
+#endif
                             }
 
                             if (opening != null)

@@ -69,9 +69,9 @@ namespace RevitMCPCommandSet.Services.Views
                             if (info.ViewportTypeId > 0)
                             {
                                 Element vpTypeElem = doc.GetElement(new ElementId(info.ViewportTypeId));
-                                if (vpTypeElem is ViewportType vpType)
+                                if (vpTypeElem != null)
                                 {
-                                    viewport.ChangeTypeId(vpType.Id);
+                                    viewport.ChangeTypeId(vpTypeElem.Id);
                                 }
                             }
 
@@ -96,7 +96,13 @@ namespace RevitMCPCommandSet.Services.Views
                             {
                                 try
                                 {
+#if REVIT2026_OR_GREATER
+                                    // R26: VIEWPORT_VIEW_ROTATION removed
+                                    Parameter rotParam = viewport.LookupParameter("Rotation on Sheet");
+                                    rotParam?.Set(info.Rotation);
+#elif REVIT2022_OR_GREATER
                                     viewport.get_Parameter(BuiltInParameter.VIEWPORT_VIEW_ROTATION)?.Set(info.Rotation);
+#endif
                                 }
                                 catch
                                 {

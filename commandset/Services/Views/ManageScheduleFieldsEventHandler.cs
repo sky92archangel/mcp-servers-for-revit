@@ -1,6 +1,3 @@
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
@@ -56,7 +53,14 @@ namespace RevitMCPCommandSet.Services.Views
                             Parameter param = FindScheduleParameter(definition, FieldName);
                             if (param != null)
                             {
+#if REVIT2026_OR_GREATER
+                                // R26: AddField takes ScheduleFieldType
+                                ScheduleField field = definition.AddField(ScheduleFieldType.Instance);
+#elif REVIT2022_OR_GREATER
                                 ScheduleField field = definition.AddField(param.Id);
+#else
+                                ScheduleField field = definition.AddField(ScheduleFieldType.Instance);
+#endif
                                 if (field != null && Position.HasValue)
                                 {
                                     ScheduleFieldId fieldId = field.FieldId;
@@ -116,7 +120,7 @@ namespace RevitMCPCommandSet.Services.Views
                                 ScheduleField field = definition.GetField(fieldId);
                                 if (field.GetSchedulableField().GetName(doc) == FieldName)
                                 {
-                                    definition.SetFieldVisibility(fieldId, false);
+                                    VersionCompat.SetScheduleFieldVisibility(definition, fieldId, false);
                                     break;
                                 }
                             }
@@ -129,7 +133,7 @@ namespace RevitMCPCommandSet.Services.Views
                                 ScheduleField field = definition.GetField(fieldId);
                                 if (field.GetSchedulableField().GetName(doc) == FieldName)
                                 {
-                                    definition.SetFieldVisibility(fieldId, true);
+                                    VersionCompat.SetScheduleFieldVisibility(definition, fieldId, true);
                                     break;
                                 }
                             }
@@ -164,16 +168,19 @@ namespace RevitMCPCommandSet.Services.Views
 
         private Parameter FindScheduleParameter(ScheduleDefinition definition, string fieldName)
         {
-            ElementId categoryId = definition.GetCategoryId();
-            Category category = Category.GetCategory(doc, categoryId);
-
-            if (category != null)
+            ElementId categoryId = VersionCompat.GetScheduleCategoryId(definition);
+            if (categoryId != ElementId.InvalidElementId)
             {
-                foreach (Parameter param in category.Parameters)
+                Category category = Category.GetCategory(doc, categoryId);
+
+                if (category != null)
                 {
-                    if (param.Definition.Name == fieldName)
+                    foreach (Parameter param in VersionCompat.GetCategoryParameters(category))
                     {
-                        return param;
+                        if (param.Definition.Name == fieldName)
+                        {
+                            return param;
+                        }
                     }
                 }
             }

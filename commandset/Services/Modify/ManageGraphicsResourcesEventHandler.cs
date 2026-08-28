@@ -1,4 +1,3 @@
-using Newtonsoft.Json.Linq;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
@@ -16,6 +15,7 @@ namespace RevitMCPCommandSet.Services.Modify
         public JObject Properties { get; private set; }
 
         public AIResult<bool> Result { get; private set; }
+        private List<string> _warnings = new List<string>();
 
         public void SetParameters(string action, string name, JObject properties)
         {
@@ -85,8 +85,25 @@ namespace RevitMCPCommandSet.Services.Modify
                 if (Properties["lineWeight"] != null)
                 {
                     int lineWeight = Properties["lineWeight"].Value<int>();
+#if REVIT2026_OR_GREATER
+                    // R26: GraphicsStyleCategory parameter access changed
+                    _warnings.Add("Line weight update not supported in Revit 2026");
+#elif REVIT2024_OR_GREATER
                     existingStyle.GraphicsStyleCategory?
                         .get_Parameter(BuiltInParameter.LINE_WEIGHT_PROJECTION)?.Set(lineWeight);
+#else
+                    if (existingStyle.GraphicsStyleCategory != null)
+                    {
+                        foreach (Parameter p in existingStyle.GraphicsStyleCategory.Parameters)
+                        {
+                            if (p.Definition is InternalDefinition id && id.BuiltInParameter == BuiltInParameter.LINE_WEIGHT_PROJECTION)
+                            {
+                                p.Set(lineWeight);
+                                break;
+                            }
+                        }
+                    }
+#endif
                 }
 
                 if (Properties["color"] != null)
@@ -98,8 +115,25 @@ namespace RevitMCPCommandSet.Services.Modify
                         byte g = (byte)(colorObj["g"]?.Value<int>() ?? 0);
                         byte b = (byte)(colorObj["b"]?.Value<int>() ?? 0);
                         Color color = new Color(r, g, b);
+#if REVIT2026_OR_GREATER
+                        // R26: GraphicsStyleCategory parameter access changed
+                        _warnings.Add("Line color update not supported in Revit 2026");
+#elif REVIT2025_OR_GREATER
                         existingStyle.GraphicsStyleCategory?
                             .get_Parameter(BuiltInParameter.LINE_COLOR)?.Set(color);
+#else
+                        if (existingStyle.GraphicsStyleCategory != null)
+                        {
+                            foreach (Parameter p in existingStyle.GraphicsStyleCategory.Parameters)
+                            {
+                                if (p.Definition is InternalDefinition id && id.BuiltInParameter == BuiltInParameter.LINE_COLOR)
+                                {
+                                    p.Set(color);
+                                    break;
+                                }
+                            }
+                        }
+#endif
                     }
                 }
 
@@ -113,8 +147,25 @@ namespace RevitMCPCommandSet.Services.Modify
 
                     if (pattern != null)
                     {
+#if REVIT2026_OR_GREATER
+                        // R26: GraphicsStyleCategory parameter access changed
+                        _warnings.Add("Line pattern update not supported in Revit 2026");
+#elif REVIT2025_OR_GREATER
                         existingStyle.GraphicsStyleCategory?
                             .get_Parameter(BuiltInParameter.LINE_PATTERN)?.Set(pattern.Id.GetIntValue());
+#else
+                        if (existingStyle.GraphicsStyleCategory != null)
+                        {
+                            foreach (Parameter p in existingStyle.GraphicsStyleCategory.Parameters)
+                            {
+                                if (p.Definition is InternalDefinition id && id.BuiltInParameter == BuiltInParameter.LINE_PATTERN)
+                                {
+                                    p.Set(pattern.Id.GetIntValue());
+                                    break;
+                                }
+                            }
+                        }
+#endif
                     }
                 }
             }
@@ -139,12 +190,16 @@ namespace RevitMCPCommandSet.Services.Modify
                         int blue = colorObj["b"]?.Value<int>() ?? 0;
 
                         FillPattern fillPattern = existingPattern.GetFillPattern();
-#if REVIT2024_OR_GREATER
+#if REVIT2026_OR_GREATER
+                        // R26: FillPattern.Color removed
+                        _warnings.Add("Fill pattern color update not supported in Revit 2026");
+#elif REVIT2024_OR_GREATER
                         fillPattern.Color = red + green * 256 + blue * 65536;
-#else
-                        fillPattern.Color = red + green * 256 + blue * 65536;
-#endif
                         existingPattern.SetFillPattern(fillPattern);
+#else
+                        // R20-R23: FillPattern.Color not available, skip color update
+                        _warnings.Add("Fill pattern color update not supported in this Revit version");
+#endif
                     }
                 }
             }

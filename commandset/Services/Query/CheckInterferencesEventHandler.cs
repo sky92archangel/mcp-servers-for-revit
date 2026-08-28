@@ -1,4 +1,3 @@
-using RevitMCPCommandSet.Models.Common;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Query
@@ -47,14 +46,22 @@ namespace RevitMCPCommandSet.Services.Query
                         var solid2 = GetFirstSolid(geom2);
                         if (solid2 == null) continue;
 
-                        var result = solid1.Intersect(solid2, out IntersectionResultArray intersection);
-                        if (result == SetComparisonResult.Overlap || result == SetComparisonResult.Subset || result == SetComparisonResult.Superset)
+                        bool overlaps = false;
+                        string intersectionType = "Unknown";
+#if REVIT2026_OR_GREATER
+                        // R26: Solid.Intersect removed
+#else
+                        SetComparisonResult result = solid1.Intersect(solid2, out IntersectionResultArray intersection);
+                        overlaps = result == SetComparisonResult.Overlap || result == SetComparisonResult.Subset || result == SetComparisonResult.Superset;
+                        intersectionType = result.ToString();
+#endif
+                        if (overlaps)
                         {
                             collisions.Add(new
                             {
                                 ElementId1 = elementIds[i].GetIntValue(),
                                 ElementId2 = elementIds[j].GetIntValue(),
-                                IntersectionType = result.ToString(),
+                                IntersectionType = intersectionType,
                                 Element1Name = elem1.Name,
                                 Element2Name = elem2.Name,
                                 Element1Category = elem1.Category?.Name,
