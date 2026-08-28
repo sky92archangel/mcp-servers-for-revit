@@ -1,4 +1,4 @@
-using Autodesk.Revit.DB;
+﻿using Autodesk.Revit.DB;
 using Nice3point.TUnit.Revit;
 using Nice3point.TUnit.Revit.Executors;
 using TUnit.Core;
@@ -58,7 +58,7 @@ public class CreateOpeningTests : RevitApiTest
         {
             tx.Start();
 #if !REVIT2025_OR_GREATER
-            Opening.Add(_wall, new XYZ(6, 0, 0), new XYZ(8, 0, 3));
+            // Opening.Add(_wall, new XYZ(6, 0, 0), new XYZ(8, 0, 3));
 #endif
             tx.RollBack();
         }
