@@ -1,4 +1,4 @@
-using RevitMCPSDK.API.Interfaces;
+﻿using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
 {
@@ -56,7 +56,7 @@ namespace RevitMCPCommandSet.Services.Views
 #if REVIT2026_OR_GREATER
                                 // R26: AddField takes ScheduleFieldType
                                 ScheduleField field = definition.AddField(ScheduleFieldType.Instance);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 ScheduleField field = definition.AddField(param.Id);
 #else
                                 ScheduleField field = definition.AddField(ScheduleFieldType.Instance);

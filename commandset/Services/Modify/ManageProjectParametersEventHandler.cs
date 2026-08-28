@@ -1,4 +1,4 @@
-using RevitMCPSDK.API.Interfaces;
+﻿using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
 {
@@ -68,10 +68,14 @@ namespace RevitMCPCommandSet.Services.Modify
                     ParameterType = def.GetDataType().ToString(),
                     Group = "PG_DATA",
                     Visible = true,
-#else
+#elif REVIT2025_OR_GREATER
                     ParameterType = def.ParameterType.ToString(),
                     Group = def.ParameterGroup.ToString(),
                     Visible = def.Visible,
+#else
+                    ParameterType = def.ParameterType.ToString(),
+                    Group = def.ParameterGroup.ToString(),
+                    Visible = true,
 #endif
                     Categories = categories
                 });
@@ -135,7 +139,7 @@ namespace RevitMCPCommandSet.Services.Modify
                                     break;
                                 }
                             }
-#elif REVIT2023_OR_GREATER
+#elif REVIT2025_OR_GREATER
                             Category cat = Category.GetCategory(Doc, catName);
 #else
                             Category cat = null;
@@ -164,10 +168,11 @@ namespace RevitMCPCommandSet.Services.Modify
 #if REVIT2026_OR_GREATER
                     // R26: BuiltInParameterGroup removed, use ForgeTypeId
                     bindingMap.Insert(sharedParam, newBinding);
-#elif REVIT2023_OR_GREATER
+#elif REVIT2025_OR_GREATER
                     bindingMap.Insert(sharedParam, newBinding, BuiltInParameterGroup.PG_DATA);
 #else
-                    bindingMap.Insert(sharedParam, newBinding, (ParameterGroup)BuiltInParameterGroup.PG_DATA);
+                    // R20-R25: BuiltInParameterGroup
+                    bindingMap.Insert(sharedParam, newBinding, BuiltInParameterGroup.PG_DATA);
 #endif
                 }
                 trans.Commit();

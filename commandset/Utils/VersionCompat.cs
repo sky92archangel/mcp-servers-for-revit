@@ -10,18 +10,20 @@ namespace RevitMCPCommandSet.Utils
     /// </summary>
     public static class VersionCompat
     {
-        // ===== Wall location curve 兼容 =====
         public static Curve GetWallLocationCurve(Wall wall)
         {
             return (wall.Location as LocationCurve)?.Curve;
         }
 
         // ===== RevisionCloud.Create 兼容 =====
-        /// R26 回退到旧签名 Create(Document, View, ElementId, IList{Curve})
-        /// R25+ 第4参数为 ElementId，R22-R24 第4参数为 View，R20-R21 只有3参数
+        // R20-R22: Create(Doc, View, ElemId, IList{Curve})
+        // R23-R24: Create(Doc, ElemId, IList{CurveLoop}, View)
+        // R25:     Create(Doc, ElemId, IList{CurveLoop}, ElemId)
+        // R26:     back to Create(Doc, View, ElemId, IList{Curve})
         public static RevisionCloud CreateRevisionCloud(
             Document doc, ElementId revisionId, IList<CurveLoop> loops, ElementId viewId)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
             var curves = new List<Curve>();
             foreach (var loop in loops)
@@ -29,12 +31,11 @@ namespace RevitMCPCommandSet.Utils
                     curves.Add(curve);
             View view = doc.GetElement(viewId) as View;
             return RevisionCloud.Create(doc, view, revisionId, curves);
-#elif REVIT2025_OR_GREATER
-            return RevisionCloud.Create(doc, revisionId, loops, viewId);
-#elif REVIT2022_OR_GREATER
-            View view = doc.GetElement(viewId) as View;
-            return RevisionCloud.Create(doc, revisionId, loops, view);
 #else
+            return RevisionCloud.Create(doc, revisionId, loops, viewId);
+#endif
+#else
+            // R20-R24, R26: Create(Doc, View, ElemId, IList{Curve})
             var curves = new List<Curve>();
             foreach (var loop in loops)
                 foreach (var curve in loop)
@@ -52,26 +53,28 @@ namespace RevitMCPCommandSet.Utils
         // ===== ReferencePlane.Create 兼容 =====
         public static ReferencePlane CreateReferencePlane(Document doc, Plane plane)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            return doc.Create.NewReferencePlane(
-                plane.Origin, plane.Origin + plane.XVec, plane.Normal, doc.ActiveView);
-#elif REVIT2025_OR_GREATER
-            return ReferencePlane.Create(doc, plane);
+            return doc.Create.NewReferencePlane(plane.Origin, plane.Origin + plane.XVec, plane.Normal, doc.ActiveView);
 #else
-            return doc.Create.NewReferencePlane(
-                plane.Origin, plane.Origin + plane.XVec, plane.Normal, doc.ActiveView);
+            return ReferencePlane.Create(doc, plane);
+#endif
+#else
+            return doc.Create.NewReferencePlane(plane.Origin, plane.Origin + plane.XVec, plane.Normal, doc.ActiveView);
 #endif
         }
 
         // ===== TextNote.Rotation 兼容 =====
         public static void SetTextNoteRotation(Document doc, TextNote textNote, double rotation)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
             XYZ center = textNote.Coord;
             Line axis = Line.CreateUnbound(center, XYZ.BasisZ);
             ElementTransformUtils.RotateElement(doc, textNote.Id, axis, rotation);
-#elif REVIT2025_OR_GREATER
+#else
             textNote.Rotation = rotation;
+#endif
 #else
             XYZ center = textNote.Coord;
             Line axis = Line.CreateUnbound(center, XYZ.BasisZ);
@@ -79,202 +82,197 @@ namespace RevitMCPCommandSet.Utils
 #endif
         }
 
-        // ===== ViewSchedule 属性兼容 =====
+        // ===== ViewSchedule 属性兼容 (R25+ only) =====
         public static void SetScheduleShowHeaders(ViewSchedule schedule, bool show)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: BuiltInParameter removed, use LookupParameter
             Parameter p = schedule.LookupParameter("Show Headers");
             if (p != null) p.Set(show ? 1 : 0);
-#elif REVIT2025_OR_GREATER
+#else
             schedule.ShowHeaders = show;
-#elif REVIT2022_OR_GREATER
-            schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_HEADER).Set(show ? 1 : 0);
+#endif
 #endif
         }
         public static void SetScheduleShowGridLines(ViewSchedule schedule, bool show)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: BuiltInParameter removed, use LookupParameter
             Parameter p = schedule.LookupParameter("Show Grid Lines");
             if (p != null) p.Set(show ? 1 : 0);
-#elif REVIT2025_OR_GREATER
+#else
             schedule.ShowGridLines = show;
-#elif REVIT2022_OR_GREATER
-            schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_GRID_LINES).Set(show ? 1 : 0);
+#endif
 #endif
         }
         public static void SetScheduleShowOutlines(ViewSchedule schedule, bool show)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: BuiltInParameter removed, use LookupParameter
             Parameter p = schedule.LookupParameter("Show Outlines");
             if (p != null) p.Set(show ? 1 : 0);
-#elif REVIT2025_OR_GREATER
+#else
             schedule.ShowOutlines = show;
-#elif REVIT2022_OR_GREATER
-            schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_OUTLINES).Set(show ? 1 : 0);
+#endif
 #endif
         }
 
-        // ===== NurbsSpline / NurbSpline 兼容 =====
+        // ===== NurbsSpline (R25+ NurbSpline.Create(IList{XYZ}), R20-R24: HermiteSpline) =====
         public static Curve CreateNurbSpline(IList<XYZ> points)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: NurbSpline.Create takes HermiteSpline
             var hermiteSpline = HermiteSpline.Create(points, false);
             return NurbSpline.Create(hermiteSpline);
 #else
             return NurbSpline.Create(new List<XYZ>(points));
 #endif
+#else
+            var hermiteSpline = HermiteSpline.Create(points, false);
+            return NurbSpline.Create(hermiteSpline);
+#endif
         }
 
-        // ===== ViewDuplicateOption.Dependent 兼容 =====
+        // ===== ViewDuplicateOption.Dependent (R25+) =====
         public static ViewDuplicateOption GetDependentDuplicateOption()
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
             return ViewDuplicateOption.Duplicate;
-#elif REVIT2025_OR_GREATER
+#else
             return ViewDuplicateOption.Dependent;
+#endif
 #else
             return ViewDuplicateOption.Duplicate;
 #endif
         }
 
-        // ===== Ceiling.Create 兼容 =====
+        // ===== Ceiling.Create (R23+) =====
         public static Ceiling CreateCeiling(Document doc, IList<CurveLoop> profile, ElementId ceilingTypeId, ElementId levelId)
         {
-#if REVIT2022_OR_GREATER
+#if REVIT2023_OR_GREATER
             return Ceiling.Create(doc, profile, ceilingTypeId, levelId);
 #else
             return null;
 #endif
         }
 
-        // ===== Floor.Create 兼容 =====
+        // ===== Floor.Create (R23+) =====
         public static Floor CreateFloor(Document doc, IList<CurveLoop> profile, ElementId floorTypeId, ElementId levelId)
         {
-#if REVIT2022_OR_GREATER
+#if REVIT2023_OR_GREATER
             return Floor.Create(doc, profile, floorTypeId, levelId);
 #else
             return null;
 #endif
         }
 
-        // ===== Space.Create 兼容 =====
+        // ===== Space.Create (R25+) =====
         public static Space CreateSpace(Document doc, ElementId levelId, XYZ point)
         {
 #if REVIT2026_OR_GREATER
-            // R26: NewSpace takes Level, UV
             Level level = doc.GetElement(levelId) as Level;
             if (level == null) return null;
             return doc.Create.NewSpace(level, new UV(point.X, point.Y));
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
             return Space.Create(doc, levelId, point);
 #else
             return null;
 #endif
         }
 
-        // ===== MEPSystem.AddElements 兼容 =====
+        // ===== MEPSystem.AddElements (R25+) =====
         public static void AddElementsToMEPSystem(MEPSystem system, IList<ElementId> elementIds)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: AddElement/AddElements removed
-#elif REVIT2022_OR_GREATER
+#else
             system.AddElements(elementIds);
+#endif
 #endif
         }
 
-        // ===== ElevationMarker.CreateElevationView 兼容 =====
-        /// R26: CreateElevationView(ElementId, int) -> CreateElevationView(XYZ, int) removed
+        // ===== ElevationMarker (R25+) =====
         public static ViewSection CreateElevationView(ElevationMarker marker, ElementId levelId, int index)
         {
 #if REVIT2026_OR_GREATER
-            // R26: CreateElevationView and ViewSection.CreateElevation removed
             return null;
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
             return marker.CreateElevationView(levelId, index);
 #else
             return null;
 #endif
         }
 
-        // ===== ViewSection.CreateCallout 兼容 =====
-        /// R26: CreateCallout(Document, ElementId, ElementId, BoundingBoxXYZ, XYZ)
+        // ===== ViewSection.CreateCallout (R25+) =====
         public static ViewSection CreateCallout(Document doc, ElementId hostViewId, ElementId viewFamilyTypeId, BoundingBoxXYZ box)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: 5th param is XYZ point2
-            return null; // Callout creation not directly supported
-#elif REVIT2022_OR_GREATER
+            return null;
+#else
             return ViewSection.CreateCallout(doc, hostViewId, viewFamilyTypeId, box);
+#endif
 #else
             return null;
 #endif
         }
 
-        // ===== View.CreateViewTemplate 兼容 =====
-        /// R26: CreateViewTemplate removed
+        // ===== View.CreateViewTemplate (R25+) =====
         public static ElementId CreateViewTemplate(Document doc, ElementId sourceViewId)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: CreateViewTemplate not available
             return ElementId.InvalidElementId;
-#elif REVIT2022_OR_GREATER
+#else
             return View.CreateViewTemplate(doc, sourceViewId);
+#endif
 #else
             return ElementId.InvalidElementId;
 #endif
         }
 
-        // ===== Duct.Create 兼容 =====
-        /// R26: Duct.Create signature changed to (Document, ElementId, ElementId, Connector, Connector)
+        // ===== Duct.Create (R25+) =====
         public static Duct CreateDuct(Document doc, ElementId systemTypeId, XYZ start, XYZ end, ElementId levelId)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: Duct.Create uses Connector-based approach, fallback to null
             return null;
-#elif REVIT2022_OR_GREATER
+#else
             return Duct.Create(doc, systemTypeId, start, end, levelId);
+#endif
 #else
             return null;
 #endif
         }
 
-        // ===== Pipe.Create 兼容 =====
+        // ===== Pipe.Create (R25+) =====
         public static Pipe CreatePipe(Document doc, ElementId systemTypeId, XYZ start, XYZ end, ElementId levelId)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: Pipe.Create uses Connector-based approach, fallback to null
             return null;
-#elif REVIT2022_OR_GREATER
+#else
             return Pipe.Create(doc, systemTypeId, start, end, levelId);
+#endif
 #else
             return null;
 #endif
         }
 
-        // ===== Conduit.Create 兼容 =====
+        // ===== Conduit.Create (R25+) =====
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-        // R26: Conduit is protected/internal, use doc.Create.NewConduit
-        public static MEPCurve CreateConduit(Document doc, ElementId conduitTypeId, XYZ start, XYZ end, ElementId levelId)
-        {
-            return null; // Conduit creation not directly supported in R26 via this API
-        }
-#elif REVIT2025_OR_GREATER
-        public static Conduit CreateConduit(Document doc, ElementId conduitTypeId, XYZ start, XYZ end, ElementId levelId)
-        {
-            return Conduit.Create(doc, conduitTypeId, start, end, levelId);
-        }
+        public static MEPCurve CreateConduit(Document doc, ElementId conduitTypeId, XYZ start, XYZ end, ElementId levelId) => null;
 #else
-        public static object CreateConduit(Document doc, ElementId conduitTypeId, XYZ start, XYZ end, ElementId levelId)
-        {
-            return null;
-        }
+        public static Conduit CreateConduit(Document doc, ElementId conduitTypeId, XYZ start, XYZ end, ElementId levelId)
+            => Conduit.Create(doc, conduitTypeId, start, end, levelId);
+#endif
+#else
+        public static object CreateConduit(Document doc, ElementId conduitTypeId, XYZ start, XYZ end, ElementId levelId) => null;
 #endif
 
-        // ===== Category.BuiltInCategory 兼容 =====
+        // ===== Category.BuiltInCategory (R25+) =====
         public static BuiltInCategory GetBuiltInCategory(Category category)
         {
 #if REVIT2025_OR_GREATER
@@ -284,59 +282,67 @@ namespace RevitMCPCommandSet.Utils
 #endif
         }
 
-        // ===== ViewSheet.AddRevision 兼容 =====
+        // ===== ViewSheet.AddRevision (R25+) =====
         public static void AddRevisionToSheet(ViewSheet sheet, ElementId revisionId)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: AddRevision removed, use parameter-based approach
-            // Revision sets are now managed via sheet parameters
-#elif REVIT2022_OR_GREATER
+#else
             sheet.AddRevision(revisionId);
+#endif
 #endif
         }
 
-        // ===== ScheduleDefinition 兼容 =====
+        // ===== ScheduleDefinition (R25+) =====
         public static void SetScheduleFieldVisibility(ScheduleDefinition definition, ScheduleFieldId fieldId, bool visible)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: SetFieldVisibility removed
-#elif REVIT2022_OR_GREATER
+#else
             definition.SetFieldVisibility(fieldId, visible);
+#endif
 #endif
         }
         public static ElementId GetScheduleCategoryId(ScheduleDefinition definition)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
             return ElementId.InvalidElementId;
-#elif REVIT2022_OR_GREATER
+#else
             return definition.GetCategoryId();
+#endif
 #else
             return ElementId.InvalidElementId;
 #endif
         }
+        // Category.Parameters (R25+)
         public static IEnumerable<Parameter> GetCategoryParameters(Category category)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: Category.Parameters removed, iterate through document parameters
             return Enumerable.Empty<Parameter>();
 #else
             return category.Parameters?.Cast<Parameter>() ?? Enumerable.Empty<Parameter>();
 #endif
+#else
+            return Enumerable.Empty<Parameter>();
+#endif
         }
 
-        // ===== Face.SurfaceType 兼容 =====
+        // ===== Face.SurfaceType (R25+) =====
         public static string GetSurfaceTypeName(Face face)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
-            // R26: SurfaceType removed, use type-based detection
             if (face is PlanarFace) return "Planar";
             if (face is CylindricalFace) return "Cylindrical";
             if (face is RevolvedFace) return "Revolved";
             if (face is RuledFace) return "Ruled";
             if (face is HermiteFace) return "Hermite";
             return "Unknown";
-#elif REVIT2022_OR_GREATER
+#else
             return face.SurfaceType.ToString();
+#endif
 #else
             if (face is PlanarFace) return "Planar";
             if (face is CylindricalFace) return "Cylindrical";
@@ -347,20 +353,21 @@ namespace RevitMCPCommandSet.Utils
 #endif
         }
 
-        // ===== IntersectionResult.Reference 兼容 =====
+        // ===== IntersectionResult.Reference (R25+) =====
         public static Reference GetIntersectionReference(IntersectionResult result)
         {
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
             return null;
-#elif REVIT2022_OR_GREATER
+#else
             return result.Reference;
+#endif
 #else
             return null;
 #endif
         }
 
         // ===== DisplayStyle 兼容 =====
-        /// 返回显示样式名称，避免直接使用 DisplayStyle 枚举（不同版本枚举值不同）
         public static string GetDisplayStyleName(string styleName)
         {
             switch (styleName.ToLower())

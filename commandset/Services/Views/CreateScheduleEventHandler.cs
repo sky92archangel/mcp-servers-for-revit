@@ -1,4 +1,4 @@
-using RevitMCPCommandSet.Models.Views;
+﻿using RevitMCPCommandSet.Models.Views;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
@@ -86,7 +86,7 @@ namespace RevitMCPCommandSet.Services.Views
 #if REVIT2026_OR_GREATER
                                 Parameter titleParam = schedule.LookupParameter("Show Title");
                                 titleParam?.Set(info.ShowTitle.Value ? 1 : 0);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 schedule.get_Parameter(BuiltInParameter.VIEW_TITLE_VISIBLE)?.Set(info.ShowTitle.Value ? 1 : 0);
 #endif
                             }
@@ -98,7 +98,7 @@ namespace RevitMCPCommandSet.Services.Views
                                 p?.Set(info.ShowHeaders.Value ? 1 : 0);
 #elif REVIT2025_OR_GREATER
                                 schedule.ShowHeaders = info.ShowHeaders.Value;
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_HEADER)?.Set(info.ShowHeaders.Value ? 1 : 0);
 #endif
                             }
@@ -110,7 +110,7 @@ namespace RevitMCPCommandSet.Services.Views
                                 p?.Set(info.ShowGridLines.Value ? 1 : 0);
 #elif REVIT2025_OR_GREATER
                                 schedule.ShowGridLines = info.ShowGridLines.Value;
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_GRID_LINES)?.Set(info.ShowGridLines.Value ? 1 : 0);
 #endif
                             }
@@ -122,7 +122,7 @@ namespace RevitMCPCommandSet.Services.Views
                                 p?.Set(info.ShowOutlines.Value ? 1 : 0);
 #elif REVIT2025_OR_GREATER
                                 schedule.ShowOutlines = info.ShowOutlines.Value;
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 schedule.get_Parameter(BuiltInParameter.VIEW_SCHEDULE_SHOW_OUTLINES)?.Set(info.ShowOutlines.Value ? 1 : 0);
 #endif
                             }

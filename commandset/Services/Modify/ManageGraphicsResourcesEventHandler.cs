@@ -88,21 +88,12 @@ namespace RevitMCPCommandSet.Services.Modify
 #if REVIT2026_OR_GREATER
                     // R26: GraphicsStyleCategory parameter access changed
                     _warnings.Add("Line weight update not supported in Revit 2026");
-#elif REVIT2024_OR_GREATER
+#elif REVIT2025_OR_GREATER
                     existingStyle.GraphicsStyleCategory?
                         .get_Parameter(BuiltInParameter.LINE_WEIGHT_PROJECTION)?.Set(lineWeight);
 #else
-                    if (existingStyle.GraphicsStyleCategory != null)
-                    {
-                        foreach (Parameter p in existingStyle.GraphicsStyleCategory.Parameters)
-                        {
-                            if (p.Definition is InternalDefinition id && id.BuiltInParameter == BuiltInParameter.LINE_WEIGHT_PROJECTION)
-                            {
-                                p.Set(lineWeight);
-                                break;
-                            }
-                        }
-                    }
+                    // R20-R23: Category.Parameters not available, skip
+                    _warnings.Add("Line weight update not supported in this Revit version");
 #endif
                 }
 
@@ -122,17 +113,8 @@ namespace RevitMCPCommandSet.Services.Modify
                         existingStyle.GraphicsStyleCategory?
                             .get_Parameter(BuiltInParameter.LINE_COLOR)?.Set(color);
 #else
-                        if (existingStyle.GraphicsStyleCategory != null)
-                        {
-                            foreach (Parameter p in existingStyle.GraphicsStyleCategory.Parameters)
-                            {
-                                if (p.Definition is InternalDefinition id && id.BuiltInParameter == BuiltInParameter.LINE_COLOR)
-                                {
-                                    p.Set(color);
-                                    break;
-                                }
-                            }
-                        }
+                        // R20-R24: Category.Parameters not available, skip
+                        _warnings.Add("Line color update not supported in this Revit version");
 #endif
                     }
                 }
@@ -154,17 +136,8 @@ namespace RevitMCPCommandSet.Services.Modify
                         existingStyle.GraphicsStyleCategory?
                             .get_Parameter(BuiltInParameter.LINE_PATTERN)?.Set(pattern.Id.GetIntValue());
 #else
-                        if (existingStyle.GraphicsStyleCategory != null)
-                        {
-                            foreach (Parameter p in existingStyle.GraphicsStyleCategory.Parameters)
-                            {
-                                if (p.Definition is InternalDefinition id && id.BuiltInParameter == BuiltInParameter.LINE_PATTERN)
-                                {
-                                    p.Set(pattern.Id.GetIntValue());
-                                    break;
-                                }
-                            }
-                        }
+                        // R20-R24: Category.Parameters not available, skip
+                        _warnings.Add("Line pattern update not supported in this Revit version");
 #endif
                     }
                 }
@@ -193,7 +166,7 @@ namespace RevitMCPCommandSet.Services.Modify
 #if REVIT2026_OR_GREATER
                         // R26: FillPattern.Color removed
                         _warnings.Add("Fill pattern color update not supported in Revit 2026");
-#elif REVIT2024_OR_GREATER
+#elif REVIT2025_OR_GREATER
                         fillPattern.Color = red + green * 256 + blue * 65536;
                         existingPattern.SetFillPattern(fillPattern);
 #else

@@ -1,4 +1,4 @@
-using RevitMCPCommandSet.Models.Views;
+﻿using RevitMCPCommandSet.Models.Views;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
@@ -119,7 +119,7 @@ namespace RevitMCPCommandSet.Services.Views
                                     {
 #if REVIT2026_OR_GREATER
                                         // R26: AddRevision removed, revisions managed via sheet parameters
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                         sheet.AddRevision(new ElementId(revId));
 #endif
                                     }

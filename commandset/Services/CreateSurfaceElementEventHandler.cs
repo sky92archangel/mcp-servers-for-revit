@@ -238,7 +238,7 @@ namespace RevitMCPCommandSet.Services
                             case BuiltInCategory.OST_Ceilings:
                                 CurveLoop ceilingCurveLoop = CurveLoop.Create(data.Boundary.OuterLoop.Select(l => JZLine.ToLine(l) as Curve).ToList());
 
-#if REVIT2022_OR_GREATER
+#if REVIT2023_OR_GREATER
                                 Ceiling ceiling = Ceiling.Create(doc, new List<CurveLoop> { ceilingCurveLoop }, ceilingType.Id, baseLevel.Id);
 #else
                                 // Ceiling.Create API not available before Revit 2022

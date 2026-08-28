@@ -1,4 +1,4 @@
-using RevitMCPCommandSet.Models.Architecture;
+﻿using RevitMCPCommandSet.Models.Architecture;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Architecture
@@ -80,7 +80,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                 curveArray.Append(Line.CreateBound(new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet),
                                     new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet)));
                                 opening = _doc.Create.NewOpening(hostWall, curveArray, false);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 // Use Opening.Add for rectangular wall openings
                                 opening = Opening.Add(hostWall, new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet),
                                     new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet));
@@ -101,7 +101,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                 curveArray.Append(Line.CreateBound(new XYZ(widthInFeet, heightInFeet, 0), new XYZ(0, heightInFeet, 0)));
                                 curveArray.Append(Line.CreateBound(new XYZ(0, heightInFeet, 0), new XYZ(0, 0, 0)));
                                 opening = _doc.Create.NewOpening(hostFloor, curveArray, false);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                     opening = Opening.Add(hostFloor, new XYZ(0, 0, 0), new XYZ(widthInFeet, heightInFeet, 0));
 #else
                                     _warnings.Add("Floor opening creation not supported in Revit 2020, skipping");
@@ -119,7 +119,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                 curveArray.Append(Line.CreateBound(new XYZ(widthInFeet, heightInFeet, 0), new XYZ(0, heightInFeet, 0)));
                                 curveArray.Append(Line.CreateBound(new XYZ(0, heightInFeet, 0), new XYZ(0, 0, 0)));
                                 opening = _doc.Create.NewOpening(hostRoof, curveArray, false);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 opening = Opening.Add(hostRoof, new XYZ(0, 0, 0), new XYZ(widthInFeet, heightInFeet, 0));
 #else
                                 _warnings.Add("Roof opening creation not supported in Revit 2020, skipping");
@@ -136,7 +136,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                 curveArray.Append(Line.CreateBound(new XYZ(widthInFeet, heightInFeet, 0), new XYZ(0, heightInFeet, 0)));
                                 curveArray.Append(Line.CreateBound(new XYZ(0, heightInFeet, 0), new XYZ(0, 0, 0)));
                                 opening = _doc.Create.NewOpening(hostElement as CeilingAndFloor, curveArray, false);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 opening = Opening.Add(hostElement as CeilingAndFloor, new XYZ(0, 0, 0), new XYZ(widthInFeet, heightInFeet, 0));
 #else
                                 _warnings.Add("Shaft opening creation not supported in Revit 2020, skipping");

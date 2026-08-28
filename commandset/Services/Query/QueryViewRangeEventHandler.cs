@@ -1,4 +1,4 @@
-using RevitMCPSDK.API.Interfaces;
+﻿using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Query
 {
@@ -35,7 +35,7 @@ namespace RevitMCPCommandSet.Services.Query
                     new { Param = PlanViewPlane.CutPlane, Name = "CutPlane" },
                     new { Param = PlanViewPlane.BottomClipPlane, Name = "Bottom" },
                     new { Param = PlanViewPlane.ViewDepthPlane, Name = "ViewDepth" }
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                     new { Param = PlanViewPlane.Top, Name = "Top" },
                     new { Param = PlanViewPlane.CutPlane, Name = "CutPlane" },
                     new { Param = PlanViewPlane.Bottom, Name = "Bottom" },

@@ -80,11 +80,7 @@ namespace RevitMCPCommandSet.Services.Modify
                                 TransformParams["normal"]["z"]?.Value<double>() ?? 0
                             ) : XYZ.BasisY;
                             var plane = Plane.CreateByNormalAndOrigin(mirrorNormal, mirrorOrigin);
-#if REVIT2022_OR_GREATER
                             ElementTransformUtils.MirrorElements(Doc, ids, plane, false);
-#else
-                            ElementTransformUtils.MirrorElements(Doc, ids, plane);
-#endif
                             break;
                         }
                         default:

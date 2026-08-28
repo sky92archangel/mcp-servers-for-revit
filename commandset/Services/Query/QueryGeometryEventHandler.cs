@@ -1,4 +1,4 @@
-using RevitMCPSDK.API.Interfaces;
+﻿using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Query
 {
@@ -37,7 +37,7 @@ namespace RevitMCPCommandSet.Services.Query
                 if (DetailLevel.HasValue)
 #if REVIT2026_OR_GREATER
                     options.DetailLevel = (ViewDetailLevel)DetailLevel.Value;
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                     options.DetailLevel = (DetailLevel)DetailLevel.Value;
 #else
                     options.DetailLevel = (ViewDetailLevel)DetailLevel.Value;

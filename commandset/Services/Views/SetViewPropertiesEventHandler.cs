@@ -71,8 +71,6 @@ namespace RevitMCPCommandSet.Services.Views
                     if (Properties["displayStyle"] != null)
                     {
                         string ds = Properties["displayStyle"].Value<string>().ToLowerInvariant();
-#if REVIT2026_OR_GREATER
-                        // R26: DisplayStyle enum values changed
                         int styleValue = 0;
                         switch (ds)
                         {
@@ -84,20 +82,11 @@ namespace RevitMCPCommandSet.Services.Views
                             case "consistent_colors": styleValue = 3; break;
                             case "realistic": styleValue = 4; break;
                         }
+#if REVIT2026_OR_GREATER
                         view.get_Parameter(BuiltInParameter.MODEL_GRAPHICS_STYLE)?.Set(styleValue);
 #else
-                        int styleValue = 0;
-                        switch (ds)
-                        {
-                            case "wireframe": styleValue = 0; break;
-                            case "hidden":
-                            case "hiddenline": styleValue = 1; break;
-                            case "shaded":
-                            case "shading": styleValue = 2; break;
-                            case "consistent_colors": styleValue = 3; break;
-                            case "realistic": styleValue = 4; break;
-                        }
-                        view.get_Parameter(BuiltInParameter.VIEW_DISPLAY_STYLE)?.Set(styleValue);
+                        // R20-R25: use VIEW_DISPLAY_STYLE or MODEL_GRAPHICS_STYLE
+                        view.get_Parameter(BuiltInParameter.MODEL_GRAPHICS_STYLE)?.Set(styleValue);
 #endif
                     }
 

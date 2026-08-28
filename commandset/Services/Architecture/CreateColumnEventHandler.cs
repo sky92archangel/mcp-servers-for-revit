@@ -1,4 +1,4 @@
-using Autodesk.Revit.DB.Structure;
+﻿using Autodesk.Revit.DB.Structure;
 using RevitMCPCommandSet.Models.Architecture;
 using RevitMCPSDK.API.Interfaces;
 
@@ -94,7 +94,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                     double heightFt = info.Height / 304.8;
                                     column.get_Parameter(BuiltInParameter.FAMILY_BASE_LEVEL_OFFSET_PARAM)?.Set(heightFt);
                                 }
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 if (info.Height > 0)
                                 {
                                     Parameter heightParam = column.get_Parameter(BuiltInParameter.COLUMN_HEIGHT);

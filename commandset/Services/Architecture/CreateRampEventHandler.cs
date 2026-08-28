@@ -1,4 +1,4 @@
-using Autodesk.Revit.DB.Architecture;
+﻿using Autodesk.Revit.DB.Architecture;
 using RevitMCPCommandSet.Models.Architecture;
 using RevitMCPSDK.API.Interfaces;
 
@@ -50,7 +50,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                             _warnings.Add("Ramp creation not yet supported in Revit 2026");
                             tx.RollBack();
                             continue;
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                             RampType rampType = null;
                             if (info.TypeId > 0)
                             {

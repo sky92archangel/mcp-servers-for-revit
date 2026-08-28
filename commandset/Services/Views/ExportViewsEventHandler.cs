@@ -1,4 +1,4 @@
-using RevitMCPCommandSet.Models.Views;
+﻿using RevitMCPCommandSet.Models.Views;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
@@ -106,16 +106,16 @@ namespace RevitMCPCommandSet.Services.Views
 #if REVIT2026_OR_GREATER
                 // R26: IFC export via different method
                 _warnings.Add("IFC export not supported in Revit 2026 via this API");
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                 IFCExportOptions ifcOpts = new IFCExportOptions();
 
                 ICollection<ElementId> viewIds = new List<ElementId> { elemId };
                 doc.Export(folderPath, fileName, viewIds, ifcOpts);
 #else
-                IFCExportOptions ifcOpts = new IFCExportOptions();
+                SATExportOptions satOpts = new SATExportOptions();
 
                 ICollection<ElementId> viewIds = new List<ElementId> { elemId };
-                doc.Export(folderPath, fileName, viewIds, ifcOpts);
+                doc.Export(folderPath, fileName, viewIds, satOpts);
 #endif
                 exportedFiles.Add($"{fileName}.ifc");
                 break;

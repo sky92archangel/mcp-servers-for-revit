@@ -1,4 +1,4 @@
-using RevitMCPSDK.API.Interfaces;
+﻿using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
 {
@@ -67,7 +67,7 @@ namespace RevitMCPCommandSet.Services.Views
 
                     offsetFt = ViewDepthOffset / 304.8;
                     viewPlan.get_Parameter(BuiltInParameter.VIEW_DEPTH)?.Set(offsetFt);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                     ViewRange viewRange = viewPlan.GetViewRange();
 
                     if (TopLevelId.HasValue)

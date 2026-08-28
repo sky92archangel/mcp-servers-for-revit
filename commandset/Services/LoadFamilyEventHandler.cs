@@ -1,4 +1,4 @@
-using RevitMCPSDK.API.Interfaces;
+﻿using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services
 {
@@ -41,7 +41,7 @@ namespace RevitMCPCommandSet.Services
 #if REVIT2026_OR_GREATER
                     // R26: LoadFamily with IFamilyLoadOptions removed
                     bool loaded = doc.LoadFamily(FilePath);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                     FamilyLoadOptions loadOptions = new FamilyLoadOptions();
                     bool loaded = doc.LoadFamily(FilePath, loadOptions);
 #else

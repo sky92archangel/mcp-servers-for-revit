@@ -1,4 +1,4 @@
-using RevitMCPSDK.API.Interfaces;
+﻿using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
 {
@@ -69,17 +69,18 @@ namespace RevitMCPCommandSet.Services.Views
 #if REVIT2026_OR_GREATER
                     // R26: CreateElevationMarker(Document, ElementId, XYZ, int)
                     ElevationMarker marker = ElevationMarker.CreateElevationMarker(doc, vft.Id, new XYZ(0, 0, level.Elevation), 100);
-
-                    int dirIndex = Math.Max(0, Math.Min(3, DirectionIndex));
-                    ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, dirIndex);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                     ElevationMarker marker = ElevationMarker.CreateElevationMarker(doc, vft.Id, level.Id, new XYZ(0, 0, level.Elevation));
+#else
+                    // R20-R21: Elevation creation not supported via this API
+                    Result = new AIResult<int> { Success = false, Message = "Elevation view creation not supported in Revit 2020-2021" };
+                    trans.RollBack();
+                    return;
+#endif
 
+#if REVIT2025_OR_GREATER
                     int dirIndex = Math.Max(0, Math.Min(3, DirectionIndex));
                     ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, dirIndex);
-#else
-                    ViewSection elevationView = ViewSection.CreateElevation(doc, level.Id, vft.Id, new XYZ(0, 0, level.Elevation), 0);
-#endif
 
                     if (!string.IsNullOrEmpty(ViewName))
                     {
@@ -96,6 +97,7 @@ namespace RevitMCPCommandSet.Services.Views
                         Message = $"Elevation view '{elevationView.Name}' created successfully at direction index {dirIndex}",
                         Response = viewId
                     };
+#endif
                 }
             }
             catch (Exception ex)

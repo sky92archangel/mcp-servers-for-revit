@@ -35,7 +35,7 @@ namespace RevitMCPCommandSet.Services.Query
                     var elem1 = Doc.GetElement(elementIds[i]);
                     if (elem1 == null) continue;
                     var geom1 = elem1.get_Geometry(options);
-                    var solid1 = GetFirstSolid(geom1);
+                    Solid solid1 = GetFirstSolid(geom1);
                     if (solid1 == null) continue;
 
                     for (int j = i + 1; j < elementIds.Count; j++)
@@ -43,17 +43,22 @@ namespace RevitMCPCommandSet.Services.Query
                         var elem2 = Doc.GetElement(elementIds[j]);
                         if (elem2 == null) continue;
                         var geom2 = elem2.get_Geometry(options);
-                        var solid2 = GetFirstSolid(geom2);
+                        Solid solid2 = GetFirstSolid(geom2);
                         if (solid2 == null) continue;
 
                         bool overlaps = false;
                         string intersectionType = "Unknown";
+#if REVIT2025_OR_GREATER
 #if REVIT2026_OR_GREATER
                         // R26: Solid.Intersect removed
 #else
-                        SetComparisonResult result = solid1.Intersect(solid2, out IntersectionResultArray intersection);
+                        IntersectionResultArray intersectionResult = null;
+                        SetComparisonResult result = solid1.Intersect(solid2, out intersectionResult);
                         overlaps = result == SetComparisonResult.Overlap || result == SetComparisonResult.Subset || result == SetComparisonResult.Superset;
                         intersectionType = result.ToString();
+#endif
+#else
+                        // R20-R21: Solid.Intersect not available, skip
 #endif
                         if (overlaps)
                         {

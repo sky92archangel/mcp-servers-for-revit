@@ -1,4 +1,4 @@
-using RevitMCPCommandSet.Models.Views;
+﻿using RevitMCPCommandSet.Models.Views;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
@@ -100,7 +100,7 @@ namespace RevitMCPCommandSet.Services.Views
                                     // R26: VIEWPORT_VIEW_ROTATION removed
                                     Parameter rotParam = viewport.LookupParameter("Rotation on Sheet");
                                     rotParam?.Set(info.Rotation);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                     viewport.get_Parameter(BuiltInParameter.VIEWPORT_VIEW_ROTATION)?.Set(info.Rotation);
 #endif
                                 }

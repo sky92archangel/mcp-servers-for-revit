@@ -1,4 +1,4 @@
-using RevitMCPCommandSet.Models.Views;
+﻿using RevitMCPCommandSet.Models.Views;
 using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Views
@@ -229,21 +229,17 @@ namespace RevitMCPCommandSet.Services.Views
 #if REVIT2026_OR_GREATER
             // R26: CreateElevationMarker(Document, ElementId, XYZ, int)
             ElevationMarker marker = ElevationMarker.CreateElevationMarker(doc, vft.Id, new XYZ(0, 0, level.Elevation), 100);
-
-            if (marker != null)
-            {
-                ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, 0);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
             ElevationMarker marker = ElevationMarker.CreateElevationMarker(doc, vft.Id, level.Id, new XYZ(0, 0, level.Elevation));
+#else
+            // R20-R21: Elevation creation not supported via this API
+            return null;
+#endif
 
+#if REVIT2025_OR_GREATER
             if (marker != null)
             {
                 ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, 0);
-#else
-            ViewSection elevationView = ViewSection.CreateElevation(doc, level.Id, vft.Id, new XYZ(0, 0, level.Elevation), 0);
-            if (elevationView != null)
-            {
-#endif
 
                 if (info.Direction != null)
                 {
@@ -265,6 +261,7 @@ namespace RevitMCPCommandSet.Services.Views
 
                 return elevationView;
             }
+#endif
 
             return null;
         }

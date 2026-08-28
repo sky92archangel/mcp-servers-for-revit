@@ -1,4 +1,4 @@
-using Autodesk.Revit.DB.Architecture;
+﻿using Autodesk.Revit.DB.Architecture;
 using RevitMCPCommandSet.Models.Architecture;
 using RevitMCPSDK.API.Interfaces;
 
@@ -94,7 +94,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                             CurveLoop curveLoop = new CurveLoop();
                             curveLoop.Append(pathLine);
                             Railing railing = Railing.Create(_doc, curveLoop, railingType.Id, level.Id);
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                             Railing railing = Railing.Create(_doc, pathLine, railingType.Id, level.Id);
 #else
                             // R20 uses CurveLoop-based Railing.Create
@@ -116,7 +116,7 @@ namespace RevitMCPCommandSet.Services.Architecture
                                         heightParam.Set(info.Height / 304.8);
                                     }
                                 }
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
                                 if (info.Height > 0 && info.Height != 1070)
                                 {
                                     Parameter heightParam = railing.get_Parameter(BuiltInParameter.RAILING_HEIGHT);

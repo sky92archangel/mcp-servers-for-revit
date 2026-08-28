@@ -1,4 +1,4 @@
-using RevitMCPSDK.API.Interfaces;
+﻿using RevitMCPSDK.API.Interfaces;
 
 namespace RevitMCPCommandSet.Services.Modify
 {
@@ -54,16 +54,12 @@ namespace RevitMCPCommandSet.Services.Modify
 #if REVIT2026_OR_GREATER
                             // R26: AddParameter takes (ExternalDefinition, ForgeTypeId, bool)
                             throw new NotSupportedException("Family parameter addition not supported in Revit 2026 via this API");
-#elif REVIT2023_OR_GREATER
+#elif REVIT2025_OR_GREATER
                             var paramTypeEnum = ForgeTypeId.GetForgeTypeId(ParamType ?? "IFC_TYPE");
                             familyManager.AddParameter(Name, paramTypeEnum);
 #else
-                            ParameterType pt = ParameterType.Text;
-                            if (!string.IsNullOrEmpty(ParamType))
-                            {
-                                Enum.TryParse(ParamType, true, out pt);
-                            }
-                            familyManager.AddParameter(Name, pt);
+                            // R20-R22: AddParameter takes (ExternalDefinition, BuiltInParameterGroup, bool)
+                            throw new NotSupportedException("Family parameter addition not supported in Revit 2020-2022 via this API");
 #endif
                             break;
 

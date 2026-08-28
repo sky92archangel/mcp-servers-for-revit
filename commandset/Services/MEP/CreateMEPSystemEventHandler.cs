@@ -1,4 +1,4 @@
-using Autodesk.Revit.DB.Mechanical;
+﻿using Autodesk.Revit.DB.Mechanical;
 using Autodesk.Revit.DB.Plumbing;
 using RevitMCPCommandSet.Models.MEP;
 using RevitMCPSDK.API.Interfaces;
@@ -131,7 +131,7 @@ namespace RevitMCPCommandSet.Services.MEP
               .Cast<MechanicalSystemType>()
               .FirstOrDefault(st => st.Name.Equals(systemType, StringComparison.OrdinalIgnoreCase));
           return mechTypes?.Id ?? ElementId.InvalidElementId;
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
           bic = BuiltInCategory.OST_MEPSystems;
 #else
           return ElementId.InvalidElementId;
@@ -147,7 +147,7 @@ namespace RevitMCPCommandSet.Services.MEP
               .Cast<PipingSystemType>()
               .FirstOrDefault(st => st.Name.Equals(systemType, StringComparison.OrdinalIgnoreCase));
           return pipeTypes?.Id ?? ElementId.InvalidElementId;
-#elif REVIT2022_OR_GREATER
+#elif REVIT2025_OR_GREATER
           bic = BuiltInCategory.OST_PipingSystems;
 #else
           return ElementId.InvalidElementId;
