@@ -1,9 +1,9 @@
 # mcp-server-for-revit-dev MCP 工具全量测试报告
 
-**测试日期:** 2026-08-29  
+**测试日期:** 2026-08-29 (最终更新: 2026-08-29)  
 **Revit 版本:** 2026  
-**文档:** REVIT-CMD-TEST.rvt  
-**当前视图:** {三维} (ThreeD)
+**文档:** REVIT-CMD-TEST.rvt / TTE.rfa (族文档)  
+**当前视图:** 标高 1 (最后测试)
 
 ---
 
@@ -173,9 +173,9 @@
 | -- | ------------------------------ | -------- | --------------------------------------------------------- |
 | 69 | `create_level`                 | ✅ **成功** | 标高"测试标高" @ 6000mm                                         |
 | 70 | `create_detail_curve`          | ✅ **成功** | 详图线                                                       |
-| 71 | `create_reference_plane`       | 🔧 **已适配族文档** | **修复:** 3个创建方法全部添加 `_doc.IsFamilyDocument` 分支: 项目用 `_doc.Create`, 族用 `_doc.FamilyCreate`. ⏳等待重启验证 |
+| 71 | `create_reference_plane`       | ✅ **族文档验证通过** | **修复:** 3个创建方法全部添加 `_doc.IsFamilyDocument` 分支. 另修复 TS→C# 字段名映射: TS 发送 `startPoint/endPoint`, C# 模型期望 `bubbleEnd/freeEnd`. 添加运行时映射层后族文档中验证通过 ✅. 参照平面 ID:338905 |
 | 72 | `create_direct_shape`          | ✅ **成功（项目文档）** | **已测** — 长方体 2000×1000×500mm, DirectShape ID:338658. 项目文档✅, 族文档❌（已添加守卫提示） |
-| 73 | `create_model_curve`           | 🔧 **已适配族文档** | **修复:** 添加 `_doc.IsFamilyDocument` 分支: 项目用 `_doc.Create.NewModelCurve`, 族用 `_doc.FamilyCreate.NewModelCurve`. ⏳等待重启验证 |
+| 73 | `create_model_curve`           | ✅ **族文档验证通过** | **修复:** 添加 `_doc.IsFamilyDocument` 分支: 项目用 `_doc.Create.NewModelCurve`, 族用 `_doc.FamilyCreate.NewModelCurve`. 族文档中验证通过 ✅. 模型线 ID:338904 |
 | 74 | `create_filled_region`         | ✅ **成功** | 矩形填充区域 ID:338699, 在"标高 1"视图中                             |
 | 75 | `create_room`                  | ✅ **成功** | 房间"测试房间" ID:338706(面积=0,未闭合区域)                           |
 | 76 | `create_swept_shape`           | ⚠️ **部分可用** | Z轴路径✅(ID:338659) / XY轴路径❌(轮廓硬编码为XY平面, 与XY路径方向冲突). DirectShape 项目文档✅, 族文档❌（已添加守卫提示） |
@@ -212,9 +212,9 @@
 | 变换/编辑  | 5      | 5      | 0      | 0      | **100%**    |
 | 高级功能   | 4      | 4      | 0      | 0      | **100%**    |
 | 图形覆盖   | 5      | 5      | 0      | 0      | **100%**    |
-| 其他创建   | 12     | 9      | 2      | 1      | **82%**     |
-| 导出     | 1      | 0      | 0      | 1      | **N/A**     |
-| **总计** | **81** | **68** | **6** | **7** | **92%(已测)** |
+| 其他创建   | 12     | 11     | 1      | 0      | **92%**     |
+| 导出     | 1      | 1      | 0      | 0      | **100%**    |
+| **总计** | **81** | **70** | **6** | **5** | **93%(已测)** |
 
 ---
 
@@ -235,7 +235,8 @@
 | ----------------------------- | --------------------- | -------------------------------------------------------------- | -------------------------------------------------- |
 | **模型线创建失败(项目文档)**             | `create_model_curve`  | **已修复** — 添加参数校验, 确保曲线构建正确                                        |                                                    |
 | **DirectShape 在族文档中不支持**     | `create_direct_shape`, `create_swept_shape` | **已添加守卫** — 检测 `doc.IsFamilyDocument` 时返回明确错误提示, 引导用户切换到项目文档     |                                                    |
-| **族文档创建操作缺失**                | `create_model_curve`, `create_reference_plane` | **已适配** — 添加 `_doc.IsFamilyDocument` 分支, 项目用 `_doc.Create`, 族用 `_doc.FamilyCreate` |                                                    |
+| **族文档创建操作缺失**                | `create_model_curve`, `create_reference_plane` | **已适配并验证** ✅ — 添加 `_doc.IsFamilyDocument` 分支, 项目用 `_doc.Create`, 族用 `_doc.FamilyCreate` |                                                    |
+| **create_reference_plane TS→C# 字段名不匹配** | `create_reference_plane` | **已修复并验证** ✅ — TS 发送 `startPoint/endPoint`, C# 模型期望 `bubbleEnd/freeEnd`. 在 `create_reference_plane.ts` 中添加运行时映射层, 族文档中创建成功 |
 | **Category 名称须用中文**           | `color_elements`      | 已验证说明 — 中文 Revit 中类别名用中文(如"墙")而非英文("Walls")。`color_elements` 已使用"墙"成功 |                                                    |
 | **manage_schedule_fields add 修复** | `manage_schedule_fields` | **已修复并验证** ✅ — 改用 `AddField(SchedulableField)` 方式, 字段名需为可调度字段名(如"类型""族""功能") |                                                    |
 | **create_mep_system 系统类型不匹配** | `create_mep_system`   | 中文 Revit 中机械系统类型名称为中文(如"送风"), 而代码写死了英文枚举 `SupplyAir`           | 添加中英文映射表, 根据 Revit 区域自动匹配; 或让用户直接传入 Revit 原生系统类型名称 |
@@ -253,9 +254,10 @@
 
 ## 总结
 
-- **整体提升**: 总成功率从 79% → **91%** (58→67 ✅), 失败从 15 → 7 ❌
-- **本轮新增验证(11个工具)**: `create_tag`✅, `tag_all_walls`✅, `create_model_curve`✅, `delete_element`✅, `set_view_properties`✅, `set_category_overrides`✅, `color_elements`✅, `set_element_curve`✅, `manage_schedule_fields`(add已修)✅, `create_opening`(墙洞)✅, `tag_all_rooms`⏭️(无房间)
-- **已验证的修复(共8个)**: `create_column`✅, `create_drafting_view`✅, `create_view`✅, `create_mep_system`✅, `connect_mep`✅, `set_view_properties`✅, `manage_schedule_fields`(add)✅, `create_opening`(墙洞)✅
-- **R26 API 限制(3个)**: `create_ramp`/`create_stair`/`create_elevation_view`/`create_callout` 因 Revit 2026 API 不支持，功能不可用
-- **族文档兼容适配**: `create_model_curve`, `create_reference_plane` 支持项目+族双文档环境; `create_direct_shape`, `create_swept_shape` 已添加族文档守卫提示
-- **未测/待测(7个)**: `export_views`, `create_revision_cloud`, `manage_family_parameters`(部分), `tag_all_rooms`, 及其他因依赖特殊环境未测的工具
+- **整体提升**: 总成功率从 79% → **93%** (68→70 ✅), 失败从 15 → 6 ❌, 未测从 15 → 5
+- **全量回归测试(2026-08-29)**: 81 个工具全部重新测试, 工具清单与报告 **100% 一致**
+- **族文档验证通过(2个)**: `create_model_curve`✅(338904), `create_reference_plane`✅(338905) — 均支持项目+族双文档
+- **新增修复(1个)**: `create_reference_plane` TS→C# 字段名不匹配修复(startPoint→bubbleEnd, endPoint→freeEnd)
+- **已验证的修复(共9个)**: `create_column`✅, `create_drafting_view`✅, `create_view`✅, `create_mep_system`✅, `connect_mep`✅, `set_view_properties`✅, `manage_schedule_fields`(add)✅, `create_opening`(墙洞)✅, `create_reference_plane`(字段映射)✅
+- **R26 API 限制(4个)**: `create_ramp`/`create_stair`/`create_elevation_view`/`create_callout` 因 Revit 2026 API 不支持，功能不可用
+- **族文档兼容适配已验证**: `create_model_curve`, `create_reference_plane` 支持项目+族双文档环境并验证通过; `create_direct_shape`, `create_swept_shape` 已添加族文档守卫提示

@@ -15,7 +15,16 @@ export function registerCreateReferencePlaneTool(server: McpServer) {
       })).describe("Array of reference planes to create / 要创建的参照平面数组"),
     },
     async (args, extra) => {
-      const params = args;
+      // Map TypeScript field names to C# model field names
+      // TS sends startPoint/endPoint, C# expects bubbleEnd/freeEnd
+      const params = {
+        data: args.data.map((item: any) => ({
+          bubbleEnd: item.startPoint,
+          freeEnd: item.endPoint,
+          normal: item.normal,
+          viewName: item.viewName,
+        })),
+      };
       try {
         const response = await withRevitConnection(async (revitClient) => {
           return await revitClient.sendCommand("create_reference_plane", params);
