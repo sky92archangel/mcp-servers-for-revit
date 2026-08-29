@@ -92,6 +92,38 @@ Restart Claude Desktop. When you see the hammer icon, the MCP server is connecte
 
 ![Claude Desktop connection](./assets/claude.png)
 
+**Development Build**
+
+When modifying the server source code (`server/src/`), build and use the local version instead of the npm package:
+
+```bash
+cd server
+npm install
+npm run build
+```
+
+Then configure your AI client to point to the local build:
+
+**Claude Code**
+```bash
+claude mcp add mcp-server-for-revit -- node E:/path/to/your/project/server/build/index.js
+```
+
+**Claude Desktop**
+```json
+{
+    "mcpServers": {
+        "mcp-server-for-revit": {
+            "command": "node",
+            "args": ["E:/path/to/your/project/server/build/index.js"],
+            "disabled": false
+        }
+    }
+}
+```
+
+> **Note:** The npm published package (`npx -y mcp-server-for-revit`) is the stable release. Use the local build only during development to test your changes.
+
 ## Revit Plugin Setup
 
 If using a release ZIP, the plugin is already included. For manual installation:
@@ -345,6 +377,8 @@ npm run build
 ```
 
 The server compiles TypeScript to `server/build/`. During development you can run it directly with `npx tsx server/src/index.ts`.
+
+> **Note:** `better-sqlite3` requires native compilation (Python + C++ build tools). If `npm install` fails, you may need to install Python first or use the npm published package instead.
 
 ### Revit Plugin + Command Set
 

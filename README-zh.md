@@ -53,6 +53,38 @@ claude mcp add mcp-server-for-revit -- cmd /c npx -y mcp-server-for-revit
 }
 ```
 
+**开发版（本地编译）：**
+
+修改了服务器源码后，使用本地编译版本替代 npm 包：
+
+```bash
+cd server
+npm install
+npm run build
+```
+
+AI 客户端配置改为指向本地文件：
+
+**Claude Code：**
+```bash
+claude mcp add mcp-server-for-revit -- node E:/path/to/your/project/server/build/index.js
+```
+
+**Claude Desktop：**
+```json
+{
+    "mcpServers": {
+        "mcp-server-for-revit": {
+            "command": "node",
+            "args": ["E:/path/to/your/project/server/build/index.js"],
+            "disabled": false
+        }
+    }
+}
+```
+
+> 注意：正式使用建议用 `npx -y mcp-server-for-revit`（npm 发布版），本地构建仅用于开发测试。
+
 ### 3. 启动 Revit
 
 启动 Revit，如果提示未知的加载项，点击 **始终加载**。在 mcp-servers-for-revit 功能区的 **Settings** 中启用所需命令并保存。
@@ -224,6 +256,13 @@ cd server
 npm install
 npm run build
 ```
+
+编译后的 JS 输出到 `server/build/`。开发时也可直接运行源码：
+```bash
+npx tsx server/src/index.ts
+```
+
+> 注意：`better-sqlite3` 需要本地编译（依赖 Python + C++ 工具链）。如果 `npm install` 失败，可先安装 Python 或改用 npm 发布版。
 
 ### Revit 插件 + 命令集
 用 Visual Studio 打开 `mcp-servers-for-revit.sln`，选择对应 Revit 版本的配置进行编译。
