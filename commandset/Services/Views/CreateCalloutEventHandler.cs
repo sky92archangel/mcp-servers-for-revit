@@ -69,6 +69,16 @@ namespace RevitMCPCommandSet.Services.Views
 
                     ViewSection callout = VersionCompat.CreateCallout(doc, hostView.Id, vft.Id, bbox);
 
+                    if (callout == null)
+                    {
+                        Result = new AIResult<int>
+                        {
+                            Success = false,
+                            Message = $"Callout view creation not supported in Revit 2026 via this API. Use an alternative view creation method."
+                        };
+                        return;
+                    }
+
                     if (!string.IsNullOrEmpty(ViewName))
                     {
                         callout.Name = ViewName;

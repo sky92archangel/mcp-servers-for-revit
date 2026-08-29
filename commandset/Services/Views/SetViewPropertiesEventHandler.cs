@@ -48,7 +48,14 @@ namespace RevitMCPCommandSet.Services.Views
                     if (Properties["scale"] != null)
                     {
                         int scaleVal = Properties["scale"].Value<int>();
-                        view.get_Parameter(BuiltInParameter.VIEW_SCALE)?.Set(scaleVal);
+                        if (view is ViewPlan || view is ViewSection || view is View3D)
+                        {
+                            view.Scale = scaleVal;
+                        }
+                        else
+                        {
+                            view.get_Parameter(BuiltInParameter.VIEW_SCALE)?.Set(scaleVal);
+                        }
                     }
 
                     if (Properties["detailLevel"] != null)

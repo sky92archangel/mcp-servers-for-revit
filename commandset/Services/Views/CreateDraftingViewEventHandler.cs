@@ -54,7 +54,7 @@ namespace RevitMCPCommandSet.Services.Views
 
                     if (Scale > 0)
                     {
-                        view.get_Parameter(BuiltInParameter.VIEW_SCALE)?.Set(Scale);
+                        view.Scale = Scale;
                     }
 
                     if (!string.IsNullOrEmpty(DetailLevel))

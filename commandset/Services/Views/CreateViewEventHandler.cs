@@ -75,7 +75,7 @@ namespace RevitMCPCommandSet.Services.Views
 
                             if (info.Scale > 0 && view.CanViewBeDuplicated(ViewDuplicateOption.Duplicate))
                             {
-                                view.get_Parameter(BuiltInParameter.VIEW_SCALE)?.Set(info.Scale);
+                                view.Scale = info.Scale;
                             }
 
                             if (!string.IsNullOrEmpty(info.DetailLevel))
@@ -238,8 +238,13 @@ namespace RevitMCPCommandSet.Services.Views
 
 #if REVIT2025_OR_GREATER
             if (marker != null)
-            {
-                ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, 0);
+                {
+                    ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, 0);
+
+                    if (elevationView == null)
+                    {
+                        return null;
+                    }
 
                 if (info.Direction != null)
                 {

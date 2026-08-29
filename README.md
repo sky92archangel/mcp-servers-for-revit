@@ -29,100 +29,88 @@ The **MCP Server** (TypeScript) translates tool calls from AI clients into WebSo
 
 ## Requirements
 
-- **Node.js 18+** (for the MCP server)
 - **Autodesk Revit 2020 - 2026** (any supported version)
+- **Node.js 18+** (only needed when building from source)
 
-## Quick Start (Using a Release)
+## Installation
 
-1. Download the ZIP for your Revit version from the [Releases](https://github.com/mcp-servers-for-revit/mcp-servers-for-revit/releases) page (e.g., `mcp-servers-for-revit-v1.0.0-Revit2025.zip`)
+### Option 1: ZIP Package (Recommended)
 
-2. Extract the ZIP and copy the contents to your Revit addins folder:
-   ```
-   %AppData%\Autodesk\Revit\Addins\<your Revit version>\
-   ```
-   After copying you should have:
-   ```
-   Addins/2025/
-   ├── mcp-servers-for-revit.addin
-   └── revit_mcp_plugin/
-       ├── RevitMCPPlugin.dll
-       ├── ...
-       └── Commands/
-           └── RevitMCPCommandSet/
-               ├── command.json
-               └── 2025/
-                   ├── RevitMCPCommandSet.dll
-                   └── ...
-   ```
+Download the ZIP for your Revit version from the [Releases](https://github.com/mcp-servers-for-revit/mcp-servers-for-revit/releases) page, then:
 
-3. Configure the MCP server in your AI client (see [MCP Server Setup](#mcp-server-setup))
+```
+Extract ZIP → right-click install.ps1 → Run with PowerShell
+```
 
-4. Start Revit — if prompted about an unknown add-in, click **Always Load**
+The package includes a bundled Node.js runtime, so **no separate Node.js installation is required**.
 
-5. In Revit, click the **Settings** button on the mcp-servers-for-revit ribbon tab, enable the commands you want to use, and click **Save**
+### Option 2: Manual Install (From Release ZIP)
 
-## MCP Server Setup
+Extract the ZIP and copy to your Revit addins folder:
+```
+%AppData%\Autodesk\Revit\Addins\<your Revit version>\
+```
 
-The MCP server is published as an npm package and can be run directly with `npx`.
+Expected structure:
+```
+Addins/2026/
+├── mcp-servers-for-revit.addin
+└── revit_mcp_plugin/
+    ├── RevitMCPPlugin.dll
+    ├── runtime/           ← bundled Node.js + MCP server
+    │   ├── node.exe
+    │   └── build/index.js
+    └── Commands/
+        └── RevitMCPCommandSet/
+            ├── command.json
+            └── 2026/
+                └── RevitMCPCommandSet.dll
+```
+
+### Option 3: Build from Source
+
+```powershell
+.\build.ps1 -RevitVersion R26     # Build command set + bundle runtime
+.\install.ps1                      # Deploy to %AppData%
+```
+
+Use `-SkipServer` to skip rebuilding the MCP server if you only changed C# code:
+```powershell
+.\build.ps1 -RevitVersion R26 -SkipServer
+```
+
+### MCP Server Setup
+
+After installation, configure your AI client to use the local runtime (no separate Node.js or npm needed):
 
 **Claude Code**
-
-Run this in a **terminal** (not inside Claude Code):
-
 ```bash
-claude mcp add mcp-server-for-revit -- cmd /c npx -y mcp-server-for-revit
+claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/revit_mcp_plugin/runtime/node.exe" "%APPDATA%/Autodesk/Revit/Addins/2026/revit_mcp_plugin/runtime/build/index.js"
 ```
 
 **Claude Desktop**
-
-Claude Desktop → Settings → Developer → Edit Config → `claude_desktop_config.json`:
-
 ```json
 {
     "mcpServers": {
         "mcp-server-for-revit": {
-            "command": "cmd",
-            "args": ["/c", "npx", "-y", "mcp-server-for-revit"]
+            "command": "%APPDATA%/Autodesk/Revit/Addins/2026/revit_mcp_plugin/runtime/node.exe",
+            "args": ["%APPDATA%/Autodesk/Revit/Addins/2026/revit_mcp_plugin/runtime/build/index.js"]
         }
     }
 }
 ```
+
+> Replace `2026` with your Revit version year.
 
 Restart Claude Desktop. When you see the hammer icon, the MCP server is connected.
 
 ![Claude Desktop connection](./assets/claude.png)
 
-**Development Build**
+### Starting the Service
 
-When modifying the server source code (`server/src/`), build and use the local version instead of the npm package:
-
-```bash
-cd server
-npm install
-npm run build
-```
-
-Then configure your AI client to point to the local build:
-
-**Claude Code**
-```bash
-claude mcp add mcp-server-for-revit -- node E:/path/to/your/project/server/build/index.js
-```
-
-**Claude Desktop**
-```json
-{
-    "mcpServers": {
-        "mcp-server-for-revit": {
-            "command": "node",
-            "args": ["E:/path/to/your/project/server/build/index.js"],
-            "disabled": false
-        }
-    }
-}
-```
-
-> **Note:** The npm published package (`npx -y mcp-server-for-revit`) is the stable release. Use the local build only during development to test your changes.
+1. Start Revit — if prompted about an unknown add-in, click **Always Load**
+2. Go to **Add-Ins** tab → click **Revit MCP Switch** → dialog shows "Open Server"
+3. The WebSocket service is now listening on port 8080
 
 ## Revit Plugin Setup
 

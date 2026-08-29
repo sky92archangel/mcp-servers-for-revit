@@ -50,17 +50,23 @@ namespace RevitMCPCommandSet.Services.Views
                     {
                         case "add":
                         {
-                            Parameter param = FindScheduleParameter(definition, FieldName);
-                            if (param != null)
+                            ScheduleFieldType fieldType = ScheduleFieldType.Instance;
+
+                            // Try to find field by name in schedulable fields first
+                            var schedulableFields = definition.GetSchedulableFields();
+                            SchedulableField targetSf = null;
+                            foreach (var sf in schedulableFields)
                             {
-#if REVIT2026_OR_GREATER
-                                // R26: AddField takes ScheduleFieldType
-                                ScheduleField field = definition.AddField(ScheduleFieldType.Instance);
-#elif REVIT2025_OR_GREATER
-                                ScheduleField field = definition.AddField(param.Id);
-#else
-                                ScheduleField field = definition.AddField(ScheduleFieldType.Instance);
-#endif
+                                if (sf.GetName(doc) == FieldName)
+                                {
+                                    targetSf = sf;
+                                    break;
+                                }
+                            }
+
+                            if (targetSf != null)
+                            {
+                                ScheduleField field = definition.AddField(targetSf);
                                 if (field != null && Position.HasValue)
                                 {
                                     ScheduleFieldId fieldId = field.FieldId;

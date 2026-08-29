@@ -45,7 +45,22 @@ namespace RevitMCPCommandSet.Services.Views
                         return;
                     }
 
-                    ElementId catId = new ElementId(CategoryId);
+                    // Resolve category: try BuiltInCategory first, then fall back to raw ElementId
+                    Category category = Category.GetCategory(doc, (BuiltInCategory)CategoryId);
+                    if (category == null)
+                    {
+                        // Try as raw Category ElementId
+                        var rawCatId = new ElementId(CategoryId);
+                        category = doc.Settings.Categories
+                            .Cast<Category>()
+                            .FirstOrDefault(c => c.Id == rawCatId);
+                    }
+                    if (category == null)
+                    {
+                        Result = new AIResult<bool> { Success = false, Message = $"Category with ID {CategoryId} not found. Use BuiltInCategory value (e.g., -2000010 for Walls) or a valid category ElementId." };
+                        return;
+                    }
+                    ElementId catId = category.Id;
                     OverrideGraphicSettings overrideSettings = new OverrideGraphicSettings();
 
                     if (Overrides != null)

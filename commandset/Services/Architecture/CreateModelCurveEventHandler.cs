@@ -119,7 +119,9 @@ namespace RevitMCPCommandSet.Services.Architecture
                                 sketchPlane = SketchPlane.Create(_doc, plane);
                             }
 
-                            ModelCurve modelCurve = _doc.Create.NewModelCurve(curve, sketchPlane);
+                            ModelCurve modelCurve = _doc.IsFamilyDocument
+                                ? _doc.FamilyCreate.NewModelCurve(curve, sketchPlane)
+                                : _doc.Create.NewModelCurve(curve, sketchPlane);
 
                             if (modelCurve != null)
                             {

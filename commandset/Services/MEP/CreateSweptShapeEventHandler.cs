@@ -29,6 +29,17 @@ namespace RevitMCPCommandSet.Services.MEP
 
       try
       {
+        if (doc.IsFamilyDocument)
+        {
+          Result = new AIResult<List<int>>
+          {
+            Success = false,
+            Message = "DirectShape is not supported in Family Documents. Please open a Project Document to use this tool.",
+            Response = new List<int>()
+          };
+          return;
+        }
+
         var elementIds = new List<int>();
         _warnings.Clear();
 
@@ -64,7 +75,15 @@ namespace RevitMCPCommandSet.Services.MEP
               pathLoop.Append(Line.CreateBound(p1, p2));
             }
 
-            // Build section profile
+            // Calculate path start direction for profile rotation
+            XYZ pathStartDir = XYZ.BasisZ;
+            if (pathLoop.Any())
+            {
+              var firstCurve = pathLoop.First();
+              pathStartDir = (firstCurve.GetEndPoint(1) - firstCurve.GetEndPoint(0)).Normalize();
+            }
+
+            // Build section profile (initially in XY plane at origin)
             CurveLoop sectionLoop = new CurveLoop();
             switch (data.SectionType.ToLower())
             {
@@ -102,6 +121,45 @@ namespace RevitMCPCommandSet.Services.MEP
               default:
                 _warnings.Add($"Unsupported section type: {data.SectionType}");
                 break;
+            }
+
+            // Rotate profile so its normal aligns with path direction
+            if (sectionLoop.Any() && pathStartDir.DotProduct(XYZ.BasisZ) < 0.999)
+            {
+              // Profile is in XY plane (normal = Z). Rotate to align with path direction.
+              Transform rotation = Transform.CreateRotation(XYZ.BasisY, Math.Acos(pathStartDir.DotProduct(XYZ.BasisZ)));
+              // Refine: use proper alignment transform
+              XYZ profileNormal = XYZ.BasisZ;
+              Transform alignTransform = Transform.Identity;
+              if (!pathStartDir.IsAlmostEqualTo(profileNormal))
+              {
+                XYZ axis = profileNormal.CrossProduct(pathStartDir).Normalize();
+                double angle = profileNormal.AngleTo(pathStartDir);
+                if (angle > 1e-9)
+                  alignTransform = Transform.CreateRotation(axis, angle);
+              }
+              CurveLoop rotatedSection = new CurveLoop();
+              foreach (Curve c in sectionLoop)
+              {
+                if (c is Line line)
+                {
+                  rotatedSection.Append(Line.CreateBound(
+                      alignTransform.OfPoint(line.GetEndPoint(0)),
+                      alignTransform.OfPoint(line.GetEndPoint(1))));
+                }
+                else if (c is Arc arc)
+                {
+                  rotatedSection.Append(Arc.Create(
+                      alignTransform.OfPoint(arc.GetEndPoint(0)),
+                      alignTransform.OfPoint(arc.GetEndPoint(1)),
+                      alignTransform.OfPoint(arc.Center)));
+                }
+                else
+                {
+                  rotatedSection.Append(c.CreateTransformed(alignTransform));
+                }
+              }
+              sectionLoop = rotatedSection;
             }
 
             if (sectionLoop.Any() && pathLoop.Any())

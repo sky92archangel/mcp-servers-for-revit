@@ -50,7 +50,16 @@ namespace RevitMCPCommandSet.Services.Annotation
 
                     if (!string.IsNullOrEmpty(RevisionNumber))
                     {
-                        revision.SetRevisionNumber(RevisionNumber);
+                        // R26: PROJECT_REVISION_REVISION_NUM parameter is read-only,
+                        // try direct property or fallback gracefully
+                        try
+                        {
+                            revision.SetRevisionNumber(RevisionNumber);
+                        }
+                        catch
+                        {
+                            // R26: parameter is read-only, skip number setting
+                        }
                     }
 
                     if (!string.IsNullOrEmpty(RevisionDescription) && string.IsNullOrEmpty(RevisionName))

@@ -57,7 +57,9 @@ namespace RevitMCPCommandSet.Services.Architecture
 
                                         // Get a suitable view for the reference plane
                                         View view = _doc.ActiveView;
-                                        refPlane = _doc.Create.NewReferencePlane(bubbleEnd, freeEnd, normal, view);
+                                        refPlane = _doc.IsFamilyDocument
+                                            ? _doc.FamilyCreate.NewReferencePlane(bubbleEnd, freeEnd, normal, view)
+                                            : _doc.Create.NewReferencePlane(bubbleEnd, freeEnd, normal, view);
                                     }
                                     break;
 
@@ -68,7 +70,9 @@ namespace RevitMCPCommandSet.Services.Architecture
                                         XYZ origin = new XYZ(info.Origin.X / 304.8, info.Origin.Y / 304.8, info.Origin.Z / 304.8);
                                         XYZ normal = new XYZ(info.Normal.X, info.Normal.Y, info.Normal.Z);
                                         Plane plane = Plane.CreateByNormalAndOrigin(normal, origin);
-                                        refPlane = VersionCompat.CreateReferencePlane(_doc, plane);
+                                        refPlane = _doc.IsFamilyDocument
+                                            ? _doc.FamilyCreate.NewReferencePlane(plane.Origin, plane.Origin + plane.XVec, plane.Normal, _doc.ActiveView)
+                                            : VersionCompat.CreateReferencePlane(_doc, plane);
                                     }
                                     break;
 
@@ -85,7 +89,9 @@ namespace RevitMCPCommandSet.Services.Architecture
                                         XYZ normal = v1.CrossProduct(v2).Normalize();
 
                                         View view = _doc.ActiveView;
-                                        refPlane = _doc.Create.NewReferencePlane(p1, p2, normal, view);
+                                        refPlane = _doc.IsFamilyDocument
+                                            ? _doc.FamilyCreate.NewReferencePlane(p1, p2, normal, view)
+                                            : _doc.Create.NewReferencePlane(p1, p2, normal, view);
                                     }
                                     break;
 

@@ -118,58 +118,65 @@ namespace RevitMCPCommandSet.Services.MEP
 
     private ElementId GetSystemTypeId(string systemType)
     {
-      BuiltInCategory bic;
-      switch (systemType.ToLower())
+      // ================================================================
+      // Mechanical system types — use MEPSystemClassification (language-agnostic)
+      // ================================================================
+      var mechClassMap = new Dictionary<string, MEPSystemClassification>(StringComparer.OrdinalIgnoreCase)
       {
-        case "supplyair":
-        case "returnair":
-        case "exhaustair":
-#if REVIT2026_OR_GREATER
-          // R26: OST_MEPSystems removed, use MechanicalSystem filter
-          var mechTypes = new FilteredElementCollector(doc)
-              .OfClass(typeof(MechanicalSystemType))
-              .Cast<MechanicalSystemType>()
-              .FirstOrDefault(st => st.Name.Equals(systemType, StringComparison.OrdinalIgnoreCase));
-          return mechTypes?.Id ?? ElementId.InvalidElementId;
-#elif REVIT2025_OR_GREATER
-          bic = BuiltInCategory.OST_MEPSystems;
-#else
-          return ElementId.InvalidElementId;
-#endif
-          break;
-        case "sanitary":
-        case "hydronicsupply":
-        case "hydronicreturn":
-#if REVIT2026_OR_GREATER
-          // R26: OST_PipingSystems removed, use PipingSystem filter
-          var pipeTypes = new FilteredElementCollector(doc)
+        ["supplyair"] = MEPSystemClassification.SupplyAir,
+        ["returnair"] = MEPSystemClassification.ReturnAir,
+        ["exhaustair"] = MEPSystemClassification.ExhaustAir,
+      };
+
+      if (mechClassMap.TryGetValue(systemType, out var mechClass))
+      {
+        var type = new FilteredElementCollector(doc)
+            .OfClass(typeof(MechanicalSystemType))
+            .Cast<MechanicalSystemType>()
+            .FirstOrDefault(st => st.SystemClassification == mechClass);
+        return type?.Id ?? ElementId.InvalidElementId;
+      }
+
+      // ================================================================
+      // Piping system types — R26 removed PipingSystemClassification enum AND
+      // RBS_PIPING_SYSTEM_CLASSIFICATION_PARAM, so use dual-language name matching
+      // ================================================================
+      var pipeNames = new Dictionary<string, string[]>(StringComparer.OrdinalIgnoreCase)
+      {
+        ["sanitary"] = new[] { "Sanitary", "卫生设备" },
+        ["hydronicsupply"] = new[] { "Hydronic Supply", "HydronicSupply", "循环供水" },
+        ["hydronicreturn"] = new[] { "Hydronic Return", "HydronicReturn", "循环回水" },
+      };
+
+      if (pipeNames.TryGetValue(systemType, out var altNames))
+      {
+        foreach (var name in altNames)
+        {
+          var type = new FilteredElementCollector(doc)
               .OfClass(typeof(PipingSystemType))
               .Cast<PipingSystemType>()
-              .FirstOrDefault(st => st.Name.Equals(systemType, StringComparison.OrdinalIgnoreCase));
-          return pipeTypes?.Id ?? ElementId.InvalidElementId;
-#elif REVIT2025_OR_GREATER
-          bic = BuiltInCategory.OST_PipingSystems;
-#else
-          return ElementId.InvalidElementId;
-#endif
-          break;
-        default:
-          return ElementId.InvalidElementId;
+              .FirstOrDefault(st => st.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+          if (type != null) return type.Id;
+        }
+        return ElementId.InvalidElementId;
       }
 
-      FilteredElementCollector collector = new FilteredElementCollector(doc)
-          .OfCategory(bic)
-          .OfClass(typeof(MEPSystemType));
+      // ================================================================
+      // Fallback: try matching by name (for custom system types)
+      // ================================================================
+      var allMech = new FilteredElementCollector(doc)
+          .OfClass(typeof(MechanicalSystemType))
+          .Cast<MechanicalSystemType>()
+          .FirstOrDefault(st => st.Name.Equals(systemType, StringComparison.OrdinalIgnoreCase));
+      if (allMech != null) return allMech.Id;
 
-      foreach (MEPSystemType st in collector.Cast<MEPSystemType>())
-      {
-        if (st.Name.Equals(systemType, StringComparison.OrdinalIgnoreCase))
-          return st.Id;
-      }
+      var allPipe = new FilteredElementCollector(doc)
+          .OfClass(typeof(PipingSystemType))
+          .Cast<PipingSystemType>()
+          .FirstOrDefault(st => st.Name.Equals(systemType, StringComparison.OrdinalIgnoreCase));
+      if (allPipe != null) return allPipe.Id;
 
-      // Fallback: return first available system type
-      MEPSystemType first = collector.Cast<MEPSystemType>().FirstOrDefault();
-      return first?.Id ?? ElementId.InvalidElementId;
+      return ElementId.InvalidElementId;
     }
 
     public bool WaitForCompletion(int timeoutMilliseconds = 15000)

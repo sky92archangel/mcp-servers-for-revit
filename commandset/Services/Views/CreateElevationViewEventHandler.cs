@@ -82,6 +82,16 @@ namespace RevitMCPCommandSet.Services.Views
                     int dirIndex = Math.Max(0, Math.Min(3, DirectionIndex));
                     ViewSection elevationView = VersionCompat.CreateElevationView(marker, level.Id, dirIndex);
 
+                    if (elevationView == null)
+                    {
+                        Result = new AIResult<int>
+                        {
+                            Success = false,
+                            Message = $"Elevation view creation from marker not supported in Revit 2026 via this API. Use create_view tool with 'Elevation' viewType instead."
+                        };
+                        return;
+                    }
+
                     if (!string.IsNullOrEmpty(ViewName))
                     {
                         elevationView.Name = ViewName;

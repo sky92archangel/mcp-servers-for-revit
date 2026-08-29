@@ -21,11 +21,40 @@ namespace RevitMCPCommandSet.Commands.Architecture
         {
             try
             {
-                List<ModelCurveCreationInfo> data = parameters["data"].ToObject<List<ModelCurveCreationInfo>>();
-                if (data == null)
-                    throw new ArgumentNullException(nameof(data), "No model curve data provided");
+                var dataList = new List<ModelCurveCreationInfo>();
+                var rawData = parameters["data"] as JArray;
 
-                _handler.SetParameters(data);
+                if (rawData == null)
+                    throw new ArgumentNullException(nameof(rawData), "No model curve data provided");
+
+                foreach (var item in rawData)
+                {
+                    if (item is JObject obj)
+                    {
+                        // Try standard deserialization first
+                        var info = obj.ToObject<ModelCurveCreationInfo>();
+
+                        // If points is empty but startPoint/endPoint are present, convert them
+                        if ((info.Points == null || info.Points.Count == 0) &&
+                            obj["startPoint"] != null && obj["endPoint"] != null)
+                        {
+                            info.Points = new List<JZPoint>
+                            {
+                                obj["startPoint"].ToObject<JZPoint>(),
+                                obj["endPoint"].ToObject<JZPoint>()
+                            };
+                        }
+
+                        // Map sketchPlaneLevel (double elevation) to sketchPlaneId (int element ID)
+                        // Not a direct mapping; sketchPlaneLevel is kept as-is; the handler will auto-create plane
+                        dataList.Add(info);
+                    }
+                }
+
+                if (dataList.Count == 0)
+                    throw new ArgumentException("No valid model curve data provided");
+
+                _handler.SetParameters(dataList);
 
                 if (RaiseAndWaitForCompletion(15000))
                 {

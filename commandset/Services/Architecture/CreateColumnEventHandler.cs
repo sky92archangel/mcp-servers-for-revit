@@ -68,14 +68,14 @@ namespace RevitMCPCommandSet.Services.Architecture
 
                     if (symbol == null) continue;
 
-                    if (!symbol.IsActive)
-                    {
-                        symbol.Activate();
-                    }
-
                     using (Transaction tx = new Transaction(_doc, "Create Column"))
                     {
                         tx.Start();
+
+                        if (!symbol.IsActive)
+                        {
+                            symbol.Activate();
+                        }
 
                         try
                         {

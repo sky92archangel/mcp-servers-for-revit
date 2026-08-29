@@ -29,6 +29,17 @@ namespace RevitMCPCommandSet.Services.MEP
 
       try
       {
+        if (doc.IsFamilyDocument)
+        {
+          Result = new AIResult<List<int>>
+          {
+            Success = false,
+            Message = "DirectShape is not supported in Family Documents. Please open a Project Document to use this tool.",
+            Response = new List<int>()
+          };
+          return;
+        }
+
         var elementIds = new List<int>();
         _warnings.Clear();
 

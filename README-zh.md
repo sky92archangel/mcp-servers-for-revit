@@ -20,70 +20,84 @@ Revit API
 
 ## 系统要求
 
-- **Node.js 18+**（用于 MCP 服务器）
 - **Autodesk Revit 2020–2026**
+- **Node.js 18+**（仅源码编译时需要）
 
-## 快速开始
+## 安装
 
-### 1. 安装 Revit 插件
+### 方式一：ZIP 包安装（推荐）
 
-从 [Releases](https://github.com/mcp-servers-for-revit/mcp-servers-for-revit/releases) 页面下载对应 Revit 版本的 ZIP 包，解压后复制到：
+从 [Releases](https://github.com/mcp-servers-for-revit/mcp-servers-for-revit/releases) 下载对应 Revit 版本的 ZIP 包：
 
+```
+解压 ZIP → 右键 install.ps1 → 使用 PowerShell 运行
+```
+
+包内已包含 Node.js 运行时，**无需单独安装 Node.js**。
+
+### 方式二：手动安装
+
+解压 ZIP，复制到 Revit 插件目录：
 ```
 %AppData%\Autodesk\Revit\Addins\<你的 Revit 版本>\
 ```
 
-### 2. 配置 MCP 服务器
+目录结构：
+```
+Addins/2026/
+├── mcp-servers-for-revit.addin
+└── revit_mcp_plugin/
+    ├── RevitMCPPlugin.dll
+    ├── runtime/           ← 内置 Node.js + MCP 服务器
+    │   ├── node.exe
+    │   └── build/index.js
+    └── Commands/
+        └── RevitMCPCommandSet/
+            ├── command.json
+            └── 2026/
+                └── RevitMCPCommandSet.dll
+```
+
+### 方式三：源码编译安装
+
+```powershell
+.\build.ps1 -RevitVersion R26     # 编译命令集 + 打包运行时
+.\install.ps1                      # 部署到 %AppData%
+```
+
+如只改了 C# 代码，跳过服务器编译：
+```powershell
+.\build.ps1 -RevitVersion R26 -SkipServer
+```
+
+### 配置 MCP 服务器
+
+安装后，AI 客户端配置为使用内置运行时（无需独立安装 Node.js 或 npm）：
 
 **Claude Code：**
 ```bash
-claude mcp add mcp-server-for-revit -- cmd /c npx -y mcp-server-for-revit
+claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/revit_mcp_plugin/runtime/node.exe" "%APPDATA%/Autodesk/Revit/Addins/2026/revit_mcp_plugin/runtime/build/index.js"
 ```
 
 **Claude Desktop：**
-`claude_desktop_config.json` 中添加：
 ```json
 {
     "mcpServers": {
         "mcp-server-for-revit": {
-            "command": "cmd",
-            "args": ["/c", "npx", "-y", "mcp-server-for-revit"]
+            "command": "%APPDATA%/Autodesk/Revit/Addins/2026/revit_mcp_plugin/runtime/node.exe",
+            "args": ["%APPDATA%/Autodesk/Revit/Addins/2026/revit_mcp_plugin/runtime/build/index.js"]
         }
     }
 }
 ```
 
-**开发版（本地编译）：**
+> 将 `2026` 替换为你实际的 Revit 版本年份。
 
-修改了服务器源码后，使用本地编译版本替代 npm 包：
+### 启动服务
 
-```bash
-cd server
-npm install
-npm run build
-```
-
-AI 客户端配置改为指向本地文件：
-
-**Claude Code：**
-```bash
-claude mcp add mcp-server-for-revit -- node E:/path/to/your/project/server/build/index.js
-```
-
-**Claude Desktop：**
-```json
-{
-    "mcpServers": {
-        "mcp-server-for-revit": {
-            "command": "node",
-            "args": ["E:/path/to/your/project/server/build/index.js"],
-            "disabled": false
-        }
-    }
-}
-```
-
-> 注意：正式使用建议用 `npx -y mcp-server-for-revit`（npm 发布版），本地构建仅用于开发测试。
+1. 启动 Revit，如提示未知加载项，点击 **始终加载**
+2. 进入 **Add-Ins** 选项卡 → 点击 **Revit MCP Switch** → 弹出 "Open Server" 对话框
+3. WebSocket 服务已启动在 8080 端口
 
 ### 3. 启动 Revit
 

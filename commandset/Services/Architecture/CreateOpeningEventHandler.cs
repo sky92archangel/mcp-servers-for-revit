@@ -68,25 +68,19 @@ namespace RevitMCPCommandSet.Services.Architecture
                                     location = VersionCompat.GetWallLocationCurve(hostWall)?.Evaluate(0.5, true);
                                 }
 
-#if REVIT2026_OR_GREATER
-                                // R26: _doc.Create.NewOpening takes CurveArray
-                                CurveArray curveArray = new CurveArray();
-                                curveArray.Append(Line.CreateBound(new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet),
-                                    new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet)));
-                                curveArray.Append(Line.CreateBound(new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet),
-                                    new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet)));
-                                curveArray.Append(Line.CreateBound(new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet),
-                                    new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet)));
-                                curveArray.Append(Line.CreateBound(new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet),
-                                    new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet)));
-                                opening = _doc.Create.NewOpening(hostWall, curveArray, false);
-#elif REVIT2025_OR_GREATER
-                                // Use Opening.Add for rectangular wall openings
-                                opening = Opening.Add(hostWall, new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet),
-                                    new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet));
-#else
-                                _warnings.Add("Wall opening creation not supported in Revit 2020, skipping");
-#endif
+                                // Revit 2026: _doc.Create.NewOpening(Wall, XYZ, XYZ) creates rectangular wall opening.
+                                // Revit 2025: Opening.Add(Wall, XYZ, XYZ) also works.
+                                // Use try-catch to handle API differences.
+                                try
+                                {
+                                    opening = _doc.Create.NewOpening(hostWall,
+                                        new XYZ(location.X - widthInFeet / 2, location.Y, location.Z + sillInFeet),
+                                        new XYZ(location.X + widthInFeet / 2, location.Y, location.Z + sillInFeet + heightInFeet));
+                                }
+                                catch
+                                {
+                                    _warnings.Add("Wall opening creation not supported in this Revit version, skipping");
+                                }
                             }
                             else if (info.OpeningType == OpeningType.FloorOpening && hostElement is Floor)
                             {
