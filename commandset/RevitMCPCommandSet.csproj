@@ -53,14 +53,27 @@
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.8.0" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="Nice3point.Revit.Build.Tasks" Version="2.*" />
-        <PackageReference Include="Nice3point.Revit.Toolkit" Version="$(RevitVersion).*" />
-        <PackageReference Include="Nice3point.Revit.Extensions" Version="$(RevitVersion).*" />
-        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="$(RevitVersion).*" />
-		<PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="$(RevitVersion).*" />
-		<PackageReference Include="RevitMCPSDK" Version="$(RevitVersion).*" />
+        <PackageReference Include="Nice3point.Revit.Toolkit" Version="2026.0.*" Condition="$(RevitVersion) == '2026'" />
+        <PackageReference Include="Nice3point.Revit.Extensions" Version="2026.0.*" Condition="$(RevitVersion) == '2026'" />
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2026.0.*" Condition="$(RevitVersion) == '2026'" />
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2026.0.*" Condition="$(RevitVersion) == '2026'" />
+        <PackageReference Include="Nice3point.Revit.Toolkit" Version="$(RevitVersion).*" Condition="$(RevitVersion) != '2026'" />
+        <PackageReference Include="Nice3point.Revit.Extensions" Version="$(RevitVersion).*" Condition="$(RevitVersion) != '2026'" />
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="$(RevitVersion).*" Condition="$(RevitVersion) != '2026'" />
+        <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="$(RevitVersion).*" Condition="$(RevitVersion) != '2026'" />
+        <PackageReference Include="RevitMCPSDK" Version="2026.0.*" Condition="$(RevitVersion) == '2026'" />
+        <PackageReference Include="RevitMCPSDK" Version="$(RevitVersion).*" Condition="$(RevitVersion) != '2026'" />
     </ItemGroup>
 
-    <ItemGroup>
+    <!-- Suppress NU1605 downgrade errors: RevitMCPSDK 2026.x requires RevitAPI >= 2026.2,
+         but the local machine runs Revit 2026 (26.0.4). Pinning to 2026.0.4 is intentional
+         to avoid Assembly version conflict at plugin load time. -->
+    <PropertyGroup>
+        <NoWarn>$(NoWarn);NU1605;NU1608</NoWarn>
+        <RestorePackagesWithLockFile>false</RestorePackagesWithLockFile>
+    </PropertyGroup>
+
+    <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
       <Reference Include="System.Net.Http" />
     </ItemGroup>
 

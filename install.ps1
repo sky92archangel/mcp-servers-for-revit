@@ -1,16 +1,23 @@
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$source = "$root\build"
 
-# Detect latest build output
-$buildDirs = Get-ChildItem "$root\plugin\bin\AddIn *" -Directory | Sort-Object Name -Descending
-if (-not $buildDirs) {
-    throw "No build output found under plugin\bin\AddIn *. Run build.ps1 first."
+# Validate build\ exists
+if (-not (Test-Path $source)) {
+    throw "build\ directory not found. Run build.ps1 first."
 }
-$buildDir = $buildDirs[0].FullName
-Write-Host "Using build output: $buildDir"
+if (-not (Test-Path "$source\revit_mcp_plugin") -or -not (Test-Path "$source\mcp-servers-for-revit.addin")) {
+    throw "build\ is incomplete. Run build.ps1 -RevitVersion R?? (e.g. R26) first."
+}
 
-# Extract Revit year from directory name (e.g., "AddIn 2026 Release R26" -> "2026")
-$year = ($buildDir -split '\\|/')[-1] -replace '^AddIn (\d{4}).*', '$1'
+# Detect Revit year from Commands\RevitMCPCommandSet\{year}\ subdirectory
+$yearDir = Get-ChildItem "$source\revit_mcp_plugin\Commands\RevitMCPCommandSet" -Directory | Select-Object -First 1
+if (-not $yearDir) {
+    throw "Cannot determine Revit year: no version directory under Commands\RevitMCPCommandSet\"
+}
+$year = [int]$yearDir.Name
+Write-Host "Build: $source (Revit $year)"
+
 $target = "$env:APPDATA\Autodesk\Revit\Addins\$year"
 $pluginTarget = "$target\revit_mcp_plugin"
 
@@ -18,7 +25,6 @@ Write-Host "Target: $target"
 
 # Remove old installation (gracefully handle locked files)
 if (Test-Path $pluginTarget) {
-    # Use robocopy to delete: mirror from an empty directory
     $emptyDir = "$env:TEMP\_empty_for_rmdir"
     if (-not (Test-Path $emptyDir)) { New-Item -ItemType Directory -Force -Path $emptyDir | Out-Null }
     robocopy $emptyDir $pluginTarget /MIR /NP /NS /NC /NFL /NDL /NJH /NJS 2>$null | Out-Null
@@ -27,10 +33,15 @@ if (Test-Path $pluginTarget) {
 if (Test-Path "$target\mcp-servers-for-revit.addin") {
     Remove-Item -LiteralPath "$target\mcp-servers-for-revit.addin" -Force -ErrorAction SilentlyContinue
 }
+# Also remove old leftover top-level RevitMCPCommandSet if present
+$oldRootCmdSet = "$target\RevitMCPCommandSet"
+if (Test-Path $oldRootCmdSet) {
+    Remove-Item -LiteralPath $oldRootCmdSet -Recurse -Force -ErrorAction SilentlyContinue
+}
 
-# Copy new files (use robocopy to handle locked files gracefully)
-robocopy "$buildDir\revit_mcp_plugin" "$pluginTarget" /E /R:2 /W:2 /NP /NS /NC /NFL /NDL /NJH /NJS 2>$null | Out-Null
-Copy-Item -LiteralPath "$buildDir\mcp-servers-for-revit.addin" -Destination "$target\" -Force -ErrorAction SilentlyContinue
+# Copy new files
+robocopy "$source\revit_mcp_plugin" "$pluginTarget" /E /R:2 /W:2 /NP /NS /NC /NFL /NDL /NJH /NJS 2>$null | Out-Null
+Copy-Item -LiteralPath "$source\mcp-servers-for-revit.addin" -Destination "$target\" -Force -ErrorAction SilentlyContinue
 
 # Generate commandRegistry.json from command.json
 $commandJsonFile = "$pluginTarget\Commands\RevitMCPCommandSet\command.json"
@@ -44,7 +55,7 @@ if (Test-Path $commandJsonFile) {
                 commandName            = $_.commandName
                 assemblyPath           = "RevitMCPCommandSet\{VERSION}\RevitMCPCommandSet.dll"
                 enabled                = $true
-                supportedRevitVersions = @([int]$year)
+                supportedRevitVersions = @($year)
                 developer              = $_.developer
                 description            = $_.description
             }
