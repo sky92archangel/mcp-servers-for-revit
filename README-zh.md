@@ -18,6 +18,8 @@ Revit 插件 (C#) — plugin/
 Revit API
 ```
 
+> 注意：MCP 服务器与 Revit 插件之间使用 **原始 TCP Socket** 通信，基于 JSON-RPC 2.0 协议（非 WebSocket）。
+
 ## 系统要求
 
 - **Autodesk Revit 2020–2026**
@@ -70,6 +72,8 @@ Addins/2026/
 .\build.ps1 -RevitVersion R26 -SkipServer
 ```
 
+> 编译后需要确保 `Commands/commandRegistry.json` 中的 `assemblyPath` 包含 `{VERSION}` 占位符（如 `RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll`），插件加载时会自动替换为当前 Revit 版本号。
+
 ### 配置 MCP 服务器
 
 安装后，AI 客户端配置为使用内置运行时（无需独立安装 Node.js 或 npm）：
@@ -96,14 +100,14 @@ claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/rev
 ### 启动服务
 
 1. 启动 Revit，如提示未知加载项，点击 **始终加载**
-2. 进入 **Add-Ins** 选项卡 → 点击 **Revit MCP Switch** → 弹出 "Open Server" 对话框
-3. WebSocket 服务已启动在 8080 端口
+2. 插件会自动启动 TCP 服务在 8080 端口，无需手动操作
+3. 通过 MCP 客户端工具验证连接（如 `say_hello`）
 
 ### 3. 启动 Revit
 
 启动 Revit，如果提示未知的加载项，点击 **始终加载**。在 mcp-servers-for-revit 功能区的 **Settings** 中启用所需命令并保存。
 
-## 支持的工具（84 个）
+## 支持的工具（84 个 Revit 命令 + 6 个实用工具）
 
 ### 通用
 
@@ -111,8 +115,9 @@ claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/rev
 | ---- | ---- |
 | `say_hello` | 在 Revit 中显示对话框（连接测试） |
 | `send_code_to_revit` | 通过 Roslyn 执行 C# 代码 |
+| `save_document` | 保存当前 Revit 文档 |
 
-### 查询与选择
+### 查询与选择（10 个）
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -127,7 +132,7 @@ claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/rev
 | `check_interferences` | 检查图元之间的碰撞干涉 |
 | `query_view_range` | 获取平面视图的视图范围 |
 
-### 创建 — 建筑
+### 创建 — 建筑（19 个）
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -151,7 +156,7 @@ claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/rev
 | `create_point_based_element` | 通用方式创建点状构件（门/窗/家具） |
 | `create_surface_based_element` | 通用方式创建面状构件（楼板/天花/屋顶） |
 
-### 创建 — MEP 机电
+### 创建 — MEP 机电（10 个）
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -166,7 +171,7 @@ claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/rev
 | `connect_mep` | 连接两个 MEP 图元 |
 | `create_mep_system` | 创建 MEP 系统 |
 
-### 注释
+### 注释（8 个）
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -179,7 +184,7 @@ claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/rev
 | `create_revision` | 创建修订 |
 | `create_revision_cloud` | 创建修订云线 |
 
-### 视图与图纸
+### 视图与图纸（18 个）
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -202,7 +207,7 @@ claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/rev
 | `manage_schedule_fields` | 管理明细表字段 |
 | `manage_graphics_resources` | 管理线样式和填充图案 |
 
-### 编辑修改
+### 编辑修改（10 个）
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -217,14 +222,14 @@ claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/rev
 | `manage_family_parameters` | 管理族参数（添加/重命名/删除/公式） |
 | `manage_project_parameters` | 管理项目参数 |
 
-### 族操作
+### 族操作（2 个）
 
 | 工具 | 说明 |
 | ---- | ---- |
 | `load_family` | 加载 .rfa 族文件 |
 | `place_family_instance` | 放置族实例（多种放置方式） |
 
-### 分析与数据
+### 分析与数据（4 个）
 
 | 工具 | 说明 |
 | ---- | ---- |
@@ -233,13 +238,7 @@ claude mcp add mcp-server-for-revit -- "%APPDATA%/Autodesk/Revit/Addins/2026/rev
 | `get_material_quantities` | 计算材料用量 |
 | `export_views` | 导出视图（PNG、JPG、DWG、DXF、IFC） |
 
-### 文档
-
-| 工具 | 说明 |
-| ---- | ---- |
-| `save_document` | 保存当前 Revit 文档 |
-
-### 本地数据库（SQLite）
+### 本地数据库（3 个）
 
 | 工具 | 说明 |
 | ---- | ---- |

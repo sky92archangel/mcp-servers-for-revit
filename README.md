@@ -20,12 +20,12 @@ flowchart LR
     Revit["Revit API"]
 
     Client <-->|stdio| Server
-    Server <-->|WebSocket| Plugin
+    Server <-->|TCP/JSON-RPC<br/>port 8080| Plugin
     Plugin -->|loads| CommandSet
     CommandSet -->|executes| Revit
 ```
 
-The **MCP Server** (TypeScript) translates tool calls from AI clients into WebSocket messages. The **Revit Plugin** (C#) runs inside Revit, listens for those messages, and dispatches them to the **Command Set** (C#), which executes the actual Revit API operations and returns results back up the chain.
+The **MCP Server** (TypeScript) translates tool calls from AI clients into TCP/JSON-RPC messages on port 8080. The **Revit Plugin** (C#) runs inside Revit, listens for those messages on a `TcpListener`, and dispatches them to the **Command Set** (C#), which executes the actual Revit API operations and returns results back up the chain.
 
 ## Requirements
 
@@ -109,8 +109,8 @@ Restart Claude Desktop. When you see the hammer icon, the MCP server is connecte
 ### Starting the Service
 
 1. Start Revit — if prompted about an unknown add-in, click **Always Load**
-2. Go to **Add-Ins** tab → click **Revit MCP Switch** → dialog shows "Open Server"
-3. The WebSocket service is now listening on port 8080
+2. The plugin automatically starts the TCP service on port 8080. No manual activation is required.
+3. Verify the connection with any MCP client tool (e.g. `say_hello`).
 
 ## Revit Plugin Setup
 
@@ -128,8 +128,12 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 2. Inside the plugin's installation directory, create `Commands/RevitMCPCommandSet/<year>/`
 3. Copy the built DLLs into that folder
 4. Copy `command.json` (from repo root) into `Commands/RevitMCPCommandSet/`
+5. Create (or update) `Commands/commandRegistry.json` as the runtime registry:
+   - Each entry's `assemblyPath` must use the `{VERSION}` placeholder, e.g. `"RevitMCPCommandSet/{VERSION}/RevitMCPCommandSet.dll"`
+   - The plugin replaces `{VERSION}` with the current Revit version at load time (e.g. `2026`)
+   - See `Commands/RevitMCPCommandSet/command.json` for the full command definitions
 
-## Supported Tools
+## Supported Tools (84 Revit commands + 6 utilities)
 
 ### General
 
@@ -137,8 +141,9 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 | ---- | ----------- |
 | `say_hello` | Display a greeting dialog in Revit (connection test) |
 | `send_code_to_revit` | Send C# code to Revit to execute via Roslyn |
+| `save_document` | Save the current Revit document |
 
-### Query & Selection
+### Query & Selection (10)
 
 | Tool | Description |
 | ---- | ----------- |
@@ -153,7 +158,7 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 | `check_interferences` | Check interference collisions between specified elements |
 | `query_view_range` | Get the view range of a plan view |
 
-### Create — Architecture
+### Create — Architecture (19)
 
 | Tool | Description |
 | ---- | ----------- |
@@ -177,7 +182,7 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 | `create_point_based_element` | Create point-based elements (door, window, furniture) — generic |
 | `create_surface_based_element` | Create surface-based elements (floor, ceiling, roof) — generic |
 
-### Create — MEP
+### Create — MEP (10)
 
 | Tool | Description |
 | ---- | ----------- |
@@ -192,7 +197,7 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 | `connect_mep` | Connect two MEP elements by their connectors |
 | `create_mep_system` | Create MEP systems from selected elements |
 
-### Annotation
+### Annotation (8)
 
 | Tool | Description |
 | ---- | ----------- |
@@ -205,7 +210,7 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 | `create_revision` | Create a revision record with name, date, and number |
 | `create_revision_cloud` | Create a revision cloud in a view associated with a revision |
 
-### Views & Sheets
+### Views & Sheets (18)
 
 | Tool | Description |
 | ---- | ----------- |
@@ -228,7 +233,7 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 | `manage_schedule_fields` | Add, remove, reorder, or hide schedule fields |
 | `manage_graphics_resources` | Manage line styles and fill patterns |
 
-### Modify
+### Modify (10)
 
 | Tool | Description |
 | ---- | ----------- |
@@ -243,14 +248,14 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 | `manage_family_parameters` | Add, rename, remove, or set formulas on family parameters |
 | `manage_project_parameters` | List or add shared parameters to the project |
 
-### Family
+### Family (2)
 
 | Tool | Description |
 | ---- | ----------- |
 | `load_family` | Load a family .rfa file into the current project |
 | `place_family_instance` | Place family instances (unhosted, hosted, face-based, workplane-based) |
 
-### Analysis & Data
+### Analysis & Data (4)
 
 | Tool | Description |
 | ---- | ----------- |
@@ -259,13 +264,7 @@ If using a release ZIP, the command set is pre-installed inside the plugin. For 
 | `get_material_quantities` | Calculate material quantities and takeoffs |
 | `export_views` | Export views to files (PNG, JPG, DWG, DXF, IFC) |
 
-### Document
-
-| Tool | Description |
-| ---- | ----------- |
-| `save_document` | Save the current Revit document |
-
-### Database (local SQLite)
+### Local Database (3)
 
 | Tool | Description |
 | ---- | ----------- |
